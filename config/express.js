@@ -5,6 +5,7 @@ var consign = require("consign");
 var formidable = require("formidable");
 var hasha = require("hasha");
 var path = require("path");
+var fsExtra = require("fs-extra");
 const fs = require("fs");
 
 var app = express();
@@ -13,6 +14,7 @@ app.set("joi",joi);
 app.set("formidable",formidable);
 app.set("hasha",hasha);
 app.set("path",path);
+app.set("fs-extra", fsExtra);
 app.set("fs",fs);
 
 app.use(express.static("./data"));

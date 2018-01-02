@@ -63,7 +63,7 @@ module.exports = (app) => {
                 res.status(409).json({"Mensagem":"Nessa determinada pasta já existe uma subpasta com o mesmo nome"})
              }
              if (err.errno==-2) {
-                res.status(404).json({"Mensagem":"Não foi possivel criar uma subpasta, pois não existe uma pasta ou subpasta com esse nome"})
+                res.status(404).json({"Mensagem":"Não foi possivel criar uma subpasta, pois não existe uma pasta com esse nome"})
              }
            }
            else {

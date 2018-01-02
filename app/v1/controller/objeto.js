@@ -1,5 +1,6 @@
 module.exports = (app) => {
    var fs = app.get("fs");
+   var fsExtra = app.get("fs-extra");
    var formidable = app.get("formidable")
    var hasha = app.get("hasha");
    var path = app.get("path");
@@ -17,8 +18,7 @@ module.exports = (app) => {
           let pathPhoto = path.extname(files.file.name);
           let photo = `${name}${pathPhoto}`;
           let newpath = "./data/" + nomePasta + "/" + photo;
-          fs.rename(oldpath,newpath,(err) => {
-             console.log(err)
+          fsExtra.move(oldpath,newpath,(err) => {
              if (err) {
                 res.status(500).json({"Mensagem":"Verifique se o nome da pasta está correto e tente novamente"}).end()
              }
@@ -43,7 +43,7 @@ module.exports = (app) => {
          let pathPhoto = path.extname(files.file.name);
          let photo = `${name}${pathPhoto}`;
          let newpath = "./data/" + nomePasta + "/" + nomeSubPasta + "/" + photo;
-         fs.rename(oldpath,newpath,(err) => {
+         fsExtra.move(oldpath,newpath,(err) => {
             if (err) {
                res.status(500).json({"Mensagem":"Verifique se o nome da pasta e da subpasta está correto e tente novamente"}).end()
             }
