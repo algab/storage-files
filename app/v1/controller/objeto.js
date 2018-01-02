@@ -13,8 +13,9 @@ module.exports = (app) => {
       let form = new formidable.IncomingForm();
       let nomePasta = req.params.nomePasta;
       form.parse(req,(err,fields,files) => {
+          let num = Math.floor(Math.random() * (1000-1));
           let oldpath = files.file.path;
-          let name = hasha.fromFileSync(oldpath,{algorithm:"md5"});
+          let name = hasha(`${oldpath}${num}`,{algorithm:"md5"});
           let pathPhoto = path.extname(files.file.name);
           let photo = `${name}${pathPhoto}`;
           let newpath = "./data/" + nomePasta + "/" + photo;
@@ -38,8 +39,9 @@ module.exports = (app) => {
      let nomePasta = req.params.nomePasta;
      let nomeSubPasta = req.params.nomeSubPasta;
      form.parse(req,(err,fields,files) => {
+         let num = Math.floor(Math.random() * (1000-1));
          let oldpath = files.file.path;
-         let name = hasha.fromFileSync(oldpath,{algorithm:"md5"});
+         let name = hasha(`${oldpath}${num}`,{algorithm:"md5"});
          let pathPhoto = path.extname(files.file.name);
          let photo = `${name}${pathPhoto}`;
          let newpath = "./data/" + nomePasta + "/" + nomeSubPasta + "/" + photo;
