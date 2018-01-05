@@ -41,6 +41,18 @@ module.exports = (app) => {
       })
    }
 
+   pasta.estatistica = (req,res) => {
+      let nomePasta = req.params.nomePasta;
+      fs.stat("./data/" + nomePasta, (err,data) => {
+         if (err) {
+            res.status(404).json({"Mensagem":"Verifique se o nome da pasta está correto"})
+         }
+         else {
+           res.status(200).json(data)
+         }
+      })
+   }
+
    pasta.editar = (req,res) => {
       let nomePastaAtual = req.params.nomePastaAtual;
       let dados = req.body;

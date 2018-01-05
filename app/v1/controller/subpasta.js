@@ -48,6 +48,19 @@ module.exports = (app) => {
       })
    }
 
+   subpasta.estatistica = (req,res) => {
+      let nomePasta = req.params.nomePasta;
+      let nomeSubPasta = req.params.nomeSubPasta;
+      fs.stat("./data/" + nomePasta + "/" + nomeSubPasta, (err,data) => {
+         if (err) {
+            res.status(404).json({"Mensagem":"Verifique se o nome da pasta e da subpasta está correto"})
+         }
+         else {
+           res.status(200).json(data)
+         }
+      })
+   }
+
    subpasta.editar = (req,res) => {
       let nomePasta = req.params.nomePasta;
       let nomeSubPastaAtual = req.params.nomeSubPastaAtual;
