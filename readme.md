@@ -1,0 +1,21 @@
+# STORAGE FILES
+
+API DE CONTROLE E ARMAZENAMENTO DE ARQUIVOS
+
+### PASTA
+
+O Diretório principal onde os arquivos serão armazenados. Pasta pode conter uma ou várias subpastas
+
+e objetos.
+
+### SUBPASTA
+
+É um diretório filho, ou seja, ele pertence a uma pasta. Uma subpasta não pode conter outras subpastas
+
+e sim objetos.
+
+### OBJETO
+
+São arquivos binários que estão armazenados dentro de uma pasta ou subpasta. Qualquer arquvio binário
+
+pode ser armazenado, como videos, áudio e imagens.
