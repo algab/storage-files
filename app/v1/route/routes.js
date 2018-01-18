@@ -8,14 +8,14 @@ module.exports = (app) => {
    // Pasta
    app.post(versao + "/pastas", pasta.criar);
    app.get(versao + "/pastas/:nomePasta", pasta.estatistica);
-   app.get(versao + "/:nomePasta", pasta.listar);
+   app.get("/:nomePasta", pasta.listar);
    app.put(versao + "/pastas/:nomePastaAtual", pasta.editar);
    app.delete(versao + "/pastas/:nomePasta", pasta.remover);
 
    // SubPasta
    app.post(versao + "/pastas/:nomePasta/subpasta", subpasta.criar);
    app.get(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta", subpasta.estatistica);
-   app.get(versao + "/:nomePasta/:nomeSubPasta", subpasta.listar);
+   app.get("/:nomePasta/:nomeSubPasta", subpasta.listar);
    app.put(versao + "/pastas/:nomePasta/subpasta/:nomeSubPastaAtual", subpasta.editar);
    app.delete(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta", subpasta.remover);
 
