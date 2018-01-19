@@ -12,25 +12,31 @@ module.exports = (app) => {
    objeto.salvarPasta = (req,res) => {
       let form = new formidable.IncomingForm();
       let nomePasta = req.params.nomePasta;
-      form.parse(req,(err,fields,files) => {
+      form.parse(req, async (err,fields,files) => {
           let num = Math.floor(Math.random() * (1000-1));
           let oldpath = files.file.path;
           let name = hasha(`${oldpath}${num}`,{algorithm:"md5"});
           let pathObjeto = path.extname(files.file.name);
-          let objeto = `${name}${pathObjeto}`;
-          let newpath = "./data/" + nomePasta + "/" + objeto;
-          fsExtra.move(oldpath,newpath,(err) => {
-             if (err) {
-                res.status(500).json({"Mensagem":"Verifique se o nome da pasta está correto e tente novamente"}).end()
-             }
-             else {
-               let mensagem = {
-                  "Mensagem" : "Objeto salvo com sucesso",
-                  "urlObjeto" : `http://${req.headers.host}/${nomePasta}/${objeto}`
+          let pasta = fs.existsSync("./data/" + nomePasta)
+          if (pasta==false) {
+            res.status(404).json({"Mensagem":"Pasta com esse nome não existe"})
+          }
+          else {
+            let objeto = `${name}${pathObjeto}`
+            let newpath = "./data/" + nomePasta + "/" + objeto
+            fsExtra.move(oldpath,newpath,(err) => {
+               if (err) {
+                  res.status(500).json({"Mensagem":"Verifique se o nome da pasta está correto e tente novamente"}).end()
                }
-               res.status(200).json(mensagem).end()
-             }
-          })
+               else {
+                 let mensagem = {
+                    "Mensagem" : "Objeto salvo com sucesso",
+                    "urlObjeto" : `http://${req.headers.host}/${nomePasta}/${objeto}`
+                 }
+                 res.status(200).json(mensagem).end()
+               }
+            })
+          }
       })
    }
 
@@ -43,20 +49,30 @@ module.exports = (app) => {
          let oldpath = files.file.path;
          let name = hasha(`${oldpath}${num}`,{algorithm:"md5"});
          let pathObjeto = path.extname(files.file.name);
-         let objeto = `${name}${pathObjeto}`;
-         let newpath = "./data/" + nomePasta + "/" + nomeSubPasta + "/" + objeto;
-         fsExtra.move(oldpath,newpath,(err) => {
-            if (err) {
-               res.status(500).json({"Mensagem":"Verifique se o nome da pasta e da subpasta está correto e tente novamente"}).end()
-            }
-            else {
-               let mensagem = {
-                  "Mensagem" : "Objeto salvo com sucesso",
-                  "urlObjeto" : `http://${req.headers.host}/${nomePasta}/${nomeSubPasta}/${objeto}`
-               }
-               res.status(200).json(mensagem).end()
-            }
-         })
+         let pasta = fs.existsSync("./data/" + nomePasta)
+         let subPasta = fs.existsSync("./data/" + nomePasta + "/" + nomeSubPasta)
+         if (pasta==false) {
+           res.status(404).json({"Mensagem":"Pasta com esse nome não existe"})
+         }
+         else if (subPasta==false) {
+           res.status(404).json({"Mensagem":"SubPasta com esse nome nessa pasta não existe"})
+         }
+         else {
+           let objeto = `${name}${pathObjeto}`;
+           let newpath = "./data/" + nomePasta + "/" + nomeSubPasta + "/" + objeto;
+           fsExtra.move(oldpath,newpath,(err) => {
+              if (err) {
+                 res.status(500).json({"Mensagem":"Verifique se o nome da pasta e da subpasta está correto e tente novamente"}).end()
+              }
+              else {
+                 let mensagem = {
+                    "Mensagem" : "Objeto salvo com sucesso",
+                    "urlObjeto" : `http://${req.headers.host}/${nomePasta}/${nomeSubPasta}/${objeto}`
+                 }
+                 res.status(200).json(mensagem).end()
+              }
+           })
+         }
      })
    }
 
