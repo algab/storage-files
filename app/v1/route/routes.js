@@ -6,16 +6,16 @@ module.exports = (app) => {
    var versao = "/v1";
 
    // Pasta
+   app.get("/:nomePasta", pasta.listar);
    app.post(versao + "/pastas", pasta.criar);
    app.get(versao + "/pastas/:nomePasta", pasta.estatistica);
-   app.get("/:nomePasta", pasta.listar);
    app.put(versao + "/pastas/:nomePastaAtual", pasta.editar);
    app.delete(versao + "/pastas/:nomePasta", pasta.remover);
 
    // SubPasta
+   app.get("/:nomePasta/:nomeSubPasta", subpasta.listar);
    app.post(versao + "/pastas/:nomePasta/subpasta", subpasta.criar);
    app.get(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta", subpasta.estatistica);
-   app.get("/:nomePasta/:nomeSubPasta", subpasta.listar);
    app.put(versao + "/pastas/:nomePasta/subpasta/:nomeSubPastaAtual", subpasta.editar);
    app.delete(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta", subpasta.remover);
 
