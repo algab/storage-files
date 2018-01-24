@@ -4,9 +4,9 @@ API DE CONTROLE E ARMAZENAMENTO DE ARQUIVOS
 
 ### PASTA
 
-O Diretório principal onde os arquivos serão armazenados. Pasta pode conter um ou mais subpastas
+O Diretório principal onde os arquivos serão armazenados. Pasta pode conter um ou mais subpastas e também
 
-e também um ou mais objetos.
+um ou mais objetos.
 
 ### SUBPASTA
 
