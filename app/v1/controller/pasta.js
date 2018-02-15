@@ -1,15 +1,15 @@
 module.exports = (app) => {
-   var model = app.model.pasta;
-   var joi = app.get("joi");
-   var fs = app.get("fs");
+   var model = app.model.pasta
+   var joi = app.get("joi")
+   var fs = app.get("fs")
 
-   var pasta = {};
+   var pasta = {}
 
-   var versao = "/v1";
+   var versao = "/v1"
 
    pasta.criar = (req,res) => {
-       let dados = req.body;
-       let result = joi.validate(dados,model);
+       let dados = req.body
+       let result = joi.validate(dados,model)
        if (result.error!=null) {
           res.status(400).json(result.error)
        }
@@ -30,7 +30,7 @@ module.exports = (app) => {
    }
 
    pasta.listar = (req,res) => {
-      let nomePasta = req.params.nomePasta;
+      let nomePasta = req.params.nomePasta
       fs.readdir("./data/" + nomePasta, (err,data) => {
          if (err) {
             res.status(404).json({"Mensagem":"Pasta não encontrada"})
@@ -42,7 +42,7 @@ module.exports = (app) => {
    }
 
    pasta.estatistica = (req,res) => {
-      let nomePasta = req.params.nomePasta;
+      let nomePasta = req.params.nomePasta
       fs.stat("./data/" + nomePasta, (err,data) => {
          if (err) {
             res.status(404).json({"Mensagem":"Verifique se o nome da pasta está correto"})
@@ -54,9 +54,9 @@ module.exports = (app) => {
    }
 
    pasta.editar = (req,res) => {
-      let nomePastaAtual = req.params.nomePastaAtual;
-      let dados = req.body;
-      let result = joi.validate(dados,model);
+      let nomePastaAtual = req.params.nomePastaAtual
+      let dados = req.body
+      let result = joi.validate(dados,model)
       if (result.error!=null) {
          res.status(400).json(result.error)
       }
@@ -77,7 +77,7 @@ module.exports = (app) => {
    }
 
    pasta.remover = (req,res) => {
-      let nomePasta = req.params.nomePasta;
+      let nomePasta = req.params.nomePasta
       fs.rmdir("./data/" + nomePasta, (err) => {
          if (err) {
            if (err.errno==-2) {
@@ -94,5 +94,5 @@ module.exports = (app) => {
    }
 
 
-   return pasta;
+   return pasta
 }

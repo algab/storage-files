@@ -1,5 +1,5 @@
-var app = require("./config/express");
+var app = require("./config/express")
 
-app.listen("3001",() => {
-   console.log("Servidor Rodando na Porta 3001");
+app.listen(app.get("port"),() => {
+   console.log("Servidor Rodando na Porta " + app.get("port"))
 })

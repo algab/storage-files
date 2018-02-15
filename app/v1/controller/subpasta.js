@@ -1,16 +1,16 @@
 module.exports = (app) => {
-   var model = app.model.pasta;
-   var joi = app.get("joi");
-   var fs = app.get("fs");
+   var model = app.model.pasta
+   var joi = app.get("joi")
+   var fs = app.get("fs")
 
-   var subpasta = {};
+   var subpasta = {}
 
-   var versao = "/v1";
+   var versao = "/v1"
 
    subpasta.criar = (req,res) => {
-      let nomePasta = req.params.nomePasta;
-      let dados = req.body;
-      let result = joi.validate(dados,model);
+      let nomePasta = req.params.nomePasta
+      let dados = req.body
+      let result = joi.validate(dados,model)
       if (result.error!=null) {
          res.status(400).json(result.error)
       }
@@ -36,8 +36,8 @@ module.exports = (app) => {
    }
 
    subpasta.listar = (req,res) => {
-      let nomePasta = req.params.nomePasta;
-      let nomeSubPasta = req.params.nomeSubPasta;
+      let nomePasta = req.params.nomePasta
+      let nomeSubPasta = req.params.nomeSubPasta
       fs.readdir("./data/" + nomePasta + "/" + nomeSubPasta, (err,data) => {
          if (err) {
             res.status(404).json({"Mensagem":"Subpasta não encontrada"})
@@ -49,8 +49,8 @@ module.exports = (app) => {
    }
 
    subpasta.estatistica = (req,res) => {
-      let nomePasta = req.params.nomePasta;
-      let nomeSubPasta = req.params.nomeSubPasta;
+      let nomePasta = req.params.nomePasta
+      let nomeSubPasta = req.params.nomeSubPasta
       fs.stat("./data/" + nomePasta + "/" + nomeSubPasta, (err,data) => {
          if (err) {
             res.status(404).json({"Mensagem":"Verifique se o nome da pasta e da subpasta está correto"})
@@ -62,10 +62,10 @@ module.exports = (app) => {
    }
 
    subpasta.editar = (req,res) => {
-      let nomePasta = req.params.nomePasta;
-      let nomeSubPastaAtual = req.params.nomeSubPastaAtual;
-      let dados = req.body;
-      let result = joi.validate(dados,model);
+      let nomePasta = req.params.nomePasta
+      let nomeSubPastaAtual = req.params.nomeSubPastaAtual
+      let dados = req.body
+      let result = joi.validate(dados,model)
       if (result.error!=null) {
          res.status(409).json(result.error)
       }
@@ -91,8 +91,8 @@ module.exports = (app) => {
    }
 
    subpasta.remover = (req,res) => {
-      let nomePasta = req.params.nomePasta;
-      let nomeSubPasta = req.params.nomeSubPasta;
+      let nomePasta = req.params.nomePasta
+      let nomeSubPasta = req.params.nomeSubPasta
       fs.rmdir("./data/" + nomePasta + "/" + nomeSubPasta, (err) => {
          if (err) {
             res.status(404).json({"Mensagem":"Subpasta não encontrada"})
@@ -103,5 +103,5 @@ module.exports = (app) => {
       })
    }
 
-   return subpasta;
+   return subpasta
 }
