@@ -2,6 +2,7 @@ module.exports = (app) => {
    var pasta = app.controller.pasta
    var subpasta = app.controller.subpasta
    var objeto = app.controller.objeto
+   var usuario = app.controller.usuario
    var auth = app.get("auth")
 
    var versao = "/v1"
@@ -14,17 +15,23 @@ module.exports = (app) => {
    app.delete(versao + "/pastas/:nomePasta",auth.authenticate("digest",{session:false}),pasta.remover)
 
    // SubPasta
-   app.get("/:nomePasta/:nomeSubPasta",auth.authenticate("digest",{session:false}),subpasta.listar)
-   app.post(versao + "/pastas/:nomePasta/subpasta",auth.authenticate("digest",{session:false}),subpasta.criar)
-   app.get(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta",auth.authenticate("digest",{session:false}),subpasta.estatistica)
-   app.put(versao + "/pastas/:nomePasta/subpasta/:nomeSubPastaAtual",auth.authenticate("digest",{session:false}),subpasta.editar)
-   app.delete(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta",auth.authenticate("digest",{session:false}),subpasta.remover)
+   app.get("/:nomePasta/:nomeSubPasta",subpasta.listar)
+   app.post(versao + "/pastas/subpastas",auth.authenticate("digest",{session:false}),subpasta.criar)
+   app.get(versao + "/pastas/:nomePasta/subpastas/:nomeSubPasta",auth.authenticate("digest",{session:false}),subpasta.estatistica)
+   app.put(versao + "/pastas/subpastas/:nomeSubPastaAtual",auth.authenticate("digest",{session:false}),subpasta.editar)
+   app.delete(versao + "/pastas/:nomePasta/subpastas/:nomeSubPasta",auth.authenticate("digest",{session:false}),subpasta.remover)
 
    //Objeto
-   app.post(versao + "/pastas/:nomePasta/objeto",auth.authenticate("digest",{session:false}),objeto.salvarPasta)
-   app.post(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta/objeto",auth.authenticate("digest",{session:false}),objeto.salvarSubPasta)
+   app.post(versao + "/pastas/:nomePasta/objeto",objeto.salvarPasta)
+   app.post(versao + "/pastas/:nomePasta/subpastas/:nomeSubPasta/objeto",objeto.salvarSubPasta)
    app.get(versao + "/pastas/:nomePasta/objeto/:nomeObjeto",auth.authenticate("digest",{session:false}),objeto.listarPasta)
-   app.get(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta/objeto/:nomeObjeto",auth.authenticate("digest",{session:false}),objeto.listarSubPasta)
+   app.get(versao + "/pastas/:nomePasta/subpastas/:nomeSubPasta/objeto/:nomeObjeto",auth.authenticate("digest",{session:false}),objeto.listarSubPasta)
    app.delete(versao + "/pastas/:nomePasta/objeto/:nomeObjeto",auth.authenticate("digest",{session:false}),objeto.removerPasta)
-   app.delete(versao + "/pastas/:nomePasta/subpasta/:nomeSubPasta/objeto/:nomeObjeto",auth.authenticate("digest",{session:false}),objeto.removerSubPasta)
+   app.delete(versao + "/pastas/:nomePasta/subpastas/:nomeSubPasta/objeto/:nomeObjeto",auth.authenticate("digest",{session:false}),objeto.removerSubPasta)
+
+   //Usuario
+   app.post(versao + "/usuarios",usuario.salvar)
+   app.get(versao + "/usuarios/:id",auth.authenticate("digest",{session:false}),usuario.listarUser)
+   app.put(versao + "/usuarios/:id",auth.authenticate("digest",{session:false}),usuario.editar)
+   app.delete(versao + "/usuarios/:id",auth.authenticate("digest",{session:false}),usuario.deletar)
 }

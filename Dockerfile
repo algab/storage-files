@@ -4,6 +4,8 @@ LABEL maintainer "Álvaro Oliveira <alvarogab6@gmail.com>"
 
 WORKDIR /home/node/app
 
+ENV TZ=America/Sao_Paulo
+
 COPY package*.json ./
 
 RUN apt-get update && apt-get install sqlite3

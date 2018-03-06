@@ -1,10 +1,10 @@
 module.exports = (app) => {
    var joi = app.get("joi")
 
-   const pasta = {
+   const subpasta = {
       nomePasta : joi.string().regex(/^[a-z]+$/).required(),
-      idUsuario : joi.string().required()
+      nomeSubpasta : joi.string().regex(/^[a-z]+$/).required()
    }
 
-   return pasta
+   return subpasta
 }
