@@ -75,7 +75,25 @@ module.exports = (app) => {
               res.status(404).json({"Mensagem":"Verifique se o nome da pasta está correto"})
            }
            else {
-             res.status(200).json(data)
+             doc = {
+               "Acesso": {
+                 "Data": gerarData(data.atime),
+                 "Hora": gerarHora(data.atime)
+               },
+               "Modificado": {
+                 "Data": gerarData(data.mtime),
+                 "Hora": gerarHora(data.mtime)
+               },
+               "Alterado": {
+                 "Data": gerarData(data.ctime),
+                 "Hora": gerarHora(data.ctime)
+               },
+               "Criação": {
+                 "Data": gerarData(data.birthtime),
+                 "Hora": gerarHora(data.birthtime)
+               }
+             }
+             res.status(200).json(doc)
            }
         })
       }
@@ -155,6 +173,16 @@ module.exports = (app) => {
      else {
         return 1
      }
+   }
+
+   function gerarData(time) {
+      let data = new Date(time)
+      return `${data.getDate()}/${data.getMonth()}/${data.getFullYear()}`
+   }
+
+   function gerarHora(time) {
+      let hora = new Date(time)
+      return `${hora.getHours()}:${hora.getMinutes()}:${hora.getSeconds()}`
    }
 
 
