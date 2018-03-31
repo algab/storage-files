@@ -1,5 +1,6 @@
 module.exports = (app) => {
    var model = app.model.usuario
+   var login = app.model.login
    var joi = app.get("joi")
    var util = app.get("util")
    var db = app.get("database")
@@ -27,7 +28,14 @@ module.exports = (app) => {
                 res.status(500).json(err)
              }
              else {
-                res.status(201).json({"Mensagem":"Usuário cadastrado com sucesso"})
+                let mensagem = {
+                  "Mensagem": "Usuário cadastrado com sucesso",
+                  "_links": [
+                    {"rel":"Criar Pasta","method":"POST","href":`${req.headers.host}/pastas`},
+                    {"rel":"Login","method":"PUT","href":`${req.headers.host}/usuarios/login`}
+                  ]
+                }
+                res.status(201).json(mensagem)
              }
           })
         }
@@ -45,10 +53,41 @@ module.exports = (app) => {
             res.status(404).json({"Mensagem":"Usuário não encontrado"})
           }
           else {
+            result[0]._links = [
+              {"rel":"Editar Usuário","method":"PUT","href":`${req.headers.host}/usuarios/${id}`},
+              {"rel":"Excluir Usuário","method":"DELETE","href":`${req.headers.host}/usuarios/${id}`}
+            ]
             res.status(200).json(result[0])
           }
         }
      })
+   }
+
+   usuario.login = (req,res) => {
+     let dados = req.body
+     let result = joi.validate(dados,login)
+     if (result.error!=null) {
+       res.status(400).json(result.error)
+     }
+     else {
+       db.all("SELECT * FROM users WHERE email = ? and password = ?",[dados.email,dados.password],(err,result) => {
+         if (err) {
+           res.status(500).json(err)
+         }
+         else {
+           if (result==null) {
+             res.status(404).json({"Mensagem":"Email ou senha estão incorretos"})
+           }
+           else {
+             result[0]._links = [
+               {"rel":"Criar Usuário","method":"POST","href":`${req.headers.host}/usuarios`},
+               {"rel":"Criar Pasta","method":"POST","href":`${req.headers.host}/pastas`}
+             ]
+             res.status(200).json(result[0])
+           }
+         }
+       })
+     }
    }
 
    usuario.editar = (req,res) => {
@@ -64,7 +103,14 @@ module.exports = (app) => {
             res.status(500).json(err)
          }
          else {
-            res.status(200).json({"Mensagem":"Usuário atualizado com sucesso"})
+            let mensagem = {
+              "Mensagem": "Usuário atualizado com sucesso",
+              "_links": [
+                {"rel":"Procurar Usuário","method":"GET","href":`${req.headers.host}/usuarios/${id}`},
+                {"rel":"Excluir Usuário","method":"DELETE","href":`${req.headers.host}/usuarios/${id}`}
+              ]
+            }
+            res.status(200).json(mensagem)
          }
        })
      }
@@ -77,7 +123,14 @@ module.exports = (app) => {
            res.status(500).json(err)
          }
          else {
-           res.status(200).json({"Mensagem":"Usuário excluido com sucesso"})
+           let mensagem = {
+             "Mensagem": "Usuário atualizado com sucesso",
+             "_links": [
+               {"rel":"Procurar Usuário","method":"GET","href":`${req.headers.host}/usuarios/${id}`},
+               {"rel":"Editar Usuário","method":"PUT","href":`${req.headers.host}/usuarios/${id}`}
+             ]
+           }
+           res.status(200).json(mensagem)
          }
       })
    }
