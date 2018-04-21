@@ -80,7 +80,7 @@ module.exports = (app) => {
                  "Data": gerarData(data.ctime),
                  "Hora": gerarHora(data.ctime)
                },
-               "Criação": {
+               "Criado": {
                  "Data": gerarData(data.birthtime),
                  "Hora": gerarHora(data.birthtime)
                }
@@ -153,7 +153,7 @@ module.exports = (app) => {
    }
 
    async function auth(user,pasta) {
-     let result = await all("SELECT id FROM users WHERE email = ?",[user])
+     let result = await all("SELECT id FROM users WHERE nick = ?",[user])
      let folder = await all("SELECT nomePasta FROM folders WHERE idUsuario = ?",[result[0].id])
      if (folder[0].nomePasta==pasta) {
         return 0
@@ -172,7 +172,7 @@ module.exports = (app) => {
       let hora = new Date(time)
       return `${hora.getHours()}:${hora.getMinutes()}:${hora.getSeconds()}`
    }
-   
+
 
 
    return subpasta

@@ -5,6 +5,7 @@ module.exports = (app) => {
      nomeUsuario : joi.string().required(),
      dataNascimento : joi.string().required(),
      sexo : joi.string().required(),
+     nick : joi.string().required(),
      email : joi.string().required(),
      password : joi.string().required()
    }

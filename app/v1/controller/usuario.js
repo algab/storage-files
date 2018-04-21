@@ -19,11 +19,15 @@ module.exports = (app) => {
       }
       else {
         let email = await all("SELECT email FROM users WHERE email = ?",[dados.email])
+        let nick = await all("SELECT nick FROM users WHERE nick = ?",[dados.nick])
         if (email.length!=0) {
           res.status(409).json({"Mensagem":"Já existe usuário com o mesmo email"})
         }
+        else if (nick.length!=0) {
+          res.status(409).json({"Mensagem":"Já existe usuário com o mesmo nick"})
+        }
         else {
-          db.run("INSERT INTO users (nomeUsuario,dataNascimento,sexo,email,password) VALUES (?,?,?,?,?)",[dados.nomeUsuario,dados.dataNascimento,dados.sexo,dados.email,dados.password],(err,result) => {
+          db.run("INSERT INTO users (nomeUsuario,dataNascimento,sexo,nick,email,password) VALUES (?,?,?,?,?,?)",[dados.nomeUsuario,dados.dataNascimento,dados.sexo,dados.nick,dados.email,dados.password],(err,result) => {
              if (err) {
                 res.status(500).json(err)
              }
@@ -31,8 +35,8 @@ module.exports = (app) => {
                 let mensagem = {
                   "Mensagem": "Usuário cadastrado com sucesso",
                   "_links": [
-                    {"rel":"Criar Pasta","method":"POST","href":`${req.headers.host}/pastas`},
-                    {"rel":"Login","method":"PUT","href":`${req.headers.host}/usuarios/login`}
+                    {"rel":"Criar Pasta","method":"POST","href":`http://${req.headers.host}${versao}/pastas`},
+                    {"rel":"Login","method":"PUT","href":`http://${req.headers.host}${versao}/usuarios/login`}
                   ]
                 }
                 res.status(201).json(mensagem)
@@ -40,6 +44,21 @@ module.exports = (app) => {
           })
         }
       }
+   }
+
+   usuario.user = (req,res) => {
+     db.all("SELECT * FROM users",(err,result) => {
+       if (err) {
+         res.status(500).json(err)
+       }
+       else {
+         result.push([
+           {"rel":"Criar Pasta","method":"POST","href":`http://${req.headers.host}${versao}/pastas`},
+           {"rel":"Login","method":"PUT","href":`http://${req.headers.host}${versao}/usuarios/login`}
+         ])
+         res.status(200).json(result)
+       }
+     })
    }
 
    usuario.listarUser = (req,res) => {
@@ -54,8 +73,8 @@ module.exports = (app) => {
           }
           else {
             result[0]._links = [
-              {"rel":"Editar Usuário","method":"PUT","href":`${req.headers.host}/usuarios/${id}`},
-              {"rel":"Excluir Usuário","method":"DELETE","href":`${req.headers.host}/usuarios/${id}`}
+              {"rel":"Editar Usuário","method":"PUT","href":`http://${req.headers.host}${versao}/usuarios/${id}`},
+              {"rel":"Excluir Usuário","method":"DELETE","href":`http://${req.headers.host}${versao}/usuarios/${id}`}
             ]
             res.status(200).json(result[0])
           }
@@ -75,13 +94,13 @@ module.exports = (app) => {
            res.status(500).json(err)
          }
          else {
-           if (result==null) {
+           if (result[0]==null) {
              res.status(404).json({"Mensagem":"Email ou senha estão incorretos"})
            }
            else {
              result[0]._links = [
-               {"rel":"Criar Usuário","method":"POST","href":`${req.headers.host}/usuarios`},
-               {"rel":"Criar Pasta","method":"POST","href":`${req.headers.host}/pastas`}
+               {"rel":"Criar Usuário","method":"POST","href":`http://${req.headers.host}${versao}/usuarios`},
+               {"rel":"Criar Pasta","method":"POST","href":`http://${req.headers.host}${versao}/pastas`}
              ]
              res.status(200).json(result[0])
            }
@@ -98,7 +117,7 @@ module.exports = (app) => {
        res.status(400).json(result.error)
      }
      else {
-       db.run("UPDATE users SET nomeUsuario = ?, dataNascimento = ?, sexo = ?, email = ?, password = ? WHERE id = ?",[dados.nomeUsuario,dados.dataNascimento,dados.sexo,dados.email,dados.password,id],(err,result) => {
+       db.run("UPDATE users SET nomeUsuario = ?, dataNascimento = ?, sexo = ?, nick = ?,email = ?, password = ? WHERE id = ?",[dados.nomeUsuario,dados.dataNascimento,dados.sexo,dados.nick,dados.email,dados.password,id],(err,result) => {
          if (err) {
             res.status(500).json(err)
          }
@@ -106,8 +125,8 @@ module.exports = (app) => {
             let mensagem = {
               "Mensagem": "Usuário atualizado com sucesso",
               "_links": [
-                {"rel":"Procurar Usuário","method":"GET","href":`${req.headers.host}/usuarios/${id}`},
-                {"rel":"Excluir Usuário","method":"DELETE","href":`${req.headers.host}/usuarios/${id}`}
+                {"rel":"Procurar Usuário","method":"GET","href":`http://${req.headers.host}${versao}/usuarios/${id}`},
+                {"rel":"Excluir Usuário","method":"DELETE","href":`http://${req.headers.host}${versao}/usuarios/${id}`}
               ]
             }
             res.status(200).json(mensagem)
@@ -124,10 +143,10 @@ module.exports = (app) => {
          }
          else {
            let mensagem = {
-             "Mensagem": "Usuário atualizado com sucesso",
+             "Mensagem": "Usuário excluido com sucesso",
              "_links": [
-               {"rel":"Procurar Usuário","method":"GET","href":`${req.headers.host}/usuarios/${id}`},
-               {"rel":"Editar Usuário","method":"PUT","href":`${req.headers.host}/usuarios/${id}`}
+               {"rel":"Procurar Usuário","method":"GET","href":`http://${req.headers.host}${versao}/usuarios/${id}`},
+               {"rel":"Editar Usuário","method":"PUT","href":`http://${req.headers.host}${versao}/usuarios/${id}`}
              ]
            }
            res.status(200).json(mensagem)
