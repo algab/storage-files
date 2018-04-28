@@ -42,20 +42,7 @@ module.exports = (app) => {
       else {
         res.status(401).send("Unauthorized")
       }
-   }
-
-   subpasta.listar = async (req,res) => {
-      let nomePasta = req.params.nomePasta
-      let nomeSubPasta = req.params.nomeSubPasta
-      fs.readdir("./data/" + nomePasta + "/" + nomeSubPasta, (err,data) => {
-         if (err) {
-            res.status(404).json({"Mensagem":"Subpasta ou Objeto não encontrado"})
-         }
-         else {
-            res.status(200).json(data)
-         }
-      })
-   }
+   }  
 
    subpasta.estatistica = async (req,res) => {
       let nomePasta = req.params.nomePasta

@@ -20,12 +20,13 @@ module.exports = (app) => {
          res.status(400).json(result.error)
        }
        else {
-         let usuario = await all("SELECT * FROM users WHERE id = ?",[dados.idUsuario])
+         let usuario = await all("SELECT * FROM users WHERE nick = ?",[dados.nick])
+         let user = usuario[0]
          if (usuario.length==0) {
            res.status(404).json({"Mensagem":"Usuário não foi encontrado"})
          }
          else {
-           let usuarioPasta = await all("SELECT id FROM folders WHERE idUsuario = ?",[dados.idUsuario])
+           let usuarioPasta = await all("SELECT id FROM folders WHERE idUsuario = ?",[user.id])
            if (usuarioPasta.length!=0) {
              res.status(409).json({"Mensagem":"Usuário já possui uma pasta"})
            }
@@ -35,7 +36,7 @@ module.exports = (app) => {
                    res.status(409).json({"Mensagem":"Pasta com o mesmo nome já existe"})
                 }
                 else {
-                   await run("INSERT INTO folders (nomePasta,idUsuario) VALUES (?,?)",[dados.nomePasta,dados.idUsuario])
+                   await run("INSERT INTO folders (nomePasta,idUsuario) VALUES (?,?)",[dados.nomePasta,user.id])
                    let mensagem = {
                      "Mensagem": "Pasta criada com sucesso",
                      "urlFolder": `http://${req.headers.host}/${dados.nomePasta}`

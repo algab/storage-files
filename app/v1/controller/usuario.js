@@ -1,6 +1,5 @@
 module.exports = (app) => {
    var model = app.model.usuario
-   var login = app.model.login
    var joi = app.get("joi")
    var util = app.get("util")
    var db = app.get("database")
@@ -84,11 +83,7 @@ module.exports = (app) => {
 
    usuario.login = (req,res) => {
      let dados = req.body
-     let result = joi.validate(dados,login)
-     if (result.error!=null) {
-       res.status(400).json(result.error)
-     }
-     else {
+     if (dados.email && dados.password) {
        db.all("SELECT * FROM users WHERE email = ? and password = ?",[dados.email,dados.password],(err,result) => {
          if (err) {
            res.status(500).json(err)
@@ -106,6 +101,9 @@ module.exports = (app) => {
            }
          }
        })
+     }
+     else {
+       res.status(400).json({"Mensagem":"No corpo da mensagem tem que estar presente o email e o password"})
      }
    }
 

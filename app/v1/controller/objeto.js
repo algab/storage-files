@@ -4,7 +4,6 @@ module.exports = (app) => {
    var formidable = app.get("formidable")
    var util = app.get("util")
    var db = app.get("database")
-   var io = app.get("io")
 
    var objeto = {}
 
@@ -21,21 +20,17 @@ module.exports = (app) => {
         }
         else {
           let form = new formidable.IncomingForm()
-          let porcentagem = 0
 
-          form.on('progress',(received,expected) => {
-            porcentagem = received/expected
-            console.log(porcentagem);
-          })
+          form.parse(req, (err,fields,files) => {})
 
-          form.parse(req, (err,fields,files) => {
-            let objeto = files.file.name
+          form.on('file',(name,file) => {
+            let objeto = file.name
             let obj = fs.existsSync(`./data/${nomePasta}/${objeto}`)
             if (obj==true) {
               let objetos = fs.readdirSync(`./data/${nomePasta}`)
               objeto = nomeObjeto(objetos,objeto)
             }
-            let oldpath = files.file.path
+            let oldpath = file.path
             let newpath = "./data/" + nomePasta + "/" + objeto
             fsExtra.move(oldpath,newpath,(err) => {
               if (err) {
@@ -74,14 +69,17 @@ module.exports = (app) => {
        }
        else {
          let form = new formidable.IncomingForm()
-         form.parse(req,(err,fields,files) => {
-           let objeto = files.file.name
+
+         form.parse(req,(err,fields,files) => {})
+
+         form.on('file',(name,file) => {
+           let objeto = file.name
            let obj = fs.existsSync(`./data/${nomePasta}/${nomeSubPasta}/${objeto}`)
            if (obj==true) {
             let objetos = fs.readdirSync(`./data/${nomePasta}/${nomeSubPasta}`)
             objeto = nomeObjeto(objetos,objeto)
            }
-           let oldpath = files.file.path
+           let oldpath = file.path
            let newpath = "./data/" + nomePasta + "/" + nomeSubPasta + "/" + objeto
            fsExtra.move(oldpath,newpath,(err) => {
               if (err) {

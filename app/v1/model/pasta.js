@@ -3,7 +3,7 @@ module.exports = (app) => {
 
    const pasta = {
       nomePasta : joi.string().regex(/^[a-z]+$/).required(),
-      idUsuario : joi.string().required()
+      nick : joi.string().required()
    }
 
    return pasta
