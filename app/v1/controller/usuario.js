@@ -26,13 +26,15 @@ module.exports = (app) => {
           res.status(409).json({"Mensagem":"Já existe usuário com o mesmo nick"})
         }
         else {
-          db.run("INSERT INTO users (nomeUsuario,dataNascimento,sexo,nick,email,password) VALUES (?,?,?,?,?,?)",[dados.nomeUsuario,dados.dataNascimento,dados.sexo,dados.nick,dados.email,dados.password],(err,result) => {
+          db.run("INSERT INTO users (nomeUsuario,dataNascimento,sexo,nick,email,password) VALUES (?,?,?,?,?,?)",[dados.nomeUsuario,dados.dataNascimento,dados.sexo,dados.nick,dados.email,dados.password], async (err,result) => {
              if (err) {
                 res.status(500).json(err)
              }
              else {
+                let usuario = await all("SELECT id FROM users ORDER BY id DESC LIMIT 1")
                 let mensagem = {
                   "Mensagem": "Usuário cadastrado com sucesso",
+                  "idUsuario": usuario[0].id,
                   "_links": [
                     {"rel":"Criar Pasta","method":"POST","href":`http://${req.headers.host}${versao}/pastas`},
                     {"rel":"Login","method":"PUT","href":`http://${req.headers.host}${versao}/usuarios/login`}
