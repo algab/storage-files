@@ -28,6 +28,6 @@ app.use(cors())
 
 app.disable("x-powered-by")
 
-consign({"cwd":"app/v1","verbose":false}).include("model").then("controller").then("route").into(app)
+consign({"cwd":"app/v1","verbose":true}).include("model").then("controller").then("route").then(".").into(app)
 
 module.exports = app
