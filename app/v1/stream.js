@@ -1,7 +1,7 @@
 module.exports = (app) => {
   var fs = app.get("fs")
 
-  app.get("/:nomePasta/:param", (req, res) => {
+  app.get("/:nomePasta/:param", (req, res) => { 
     let nomePasta = req.params.nomePasta
     let param = req.params.param
     let exp = new RegExp("[.]")
@@ -36,4 +36,5 @@ module.exports = (app) => {
     })
     objeto.pipe(res)
   })
+  
 }
