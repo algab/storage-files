@@ -4,9 +4,8 @@ module.exports = (app) => {
   app.get("/:nomePasta/:param", (req, res) => { 
     let nomePasta = req.params.nomePasta
     let param = req.params.param
-    let exp = new RegExp("[.]")
-    let result = param.search(exp)
-    if (result == -1) {
+    let resultado = param.search(new RegExp("[.]"))
+    if (resultado == -1) {
       fs.readdir(`./data/${nomePasta}/${param}`, (err, data) => {
         if (err) {
           res.status(404).json({ "Mensagem": "Subpasta não encontrada" })
@@ -36,5 +35,5 @@ module.exports = (app) => {
     })
     objeto.pipe(res)
   })
-  
+    
 }

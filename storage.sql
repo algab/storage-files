@@ -5,7 +5,8 @@ dataNascimento VARCHAR(10) NOT NULL,
 sexo VARCHAR(20) NOT NULL,
 nick VARCHAR(10) NOT NULL,
 email VARCHAR(20) NOT NULL,
-password VARCHAR(10) NOT NULL
+password VARCHAR(10) NOT NULL,
+token VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE folders(
