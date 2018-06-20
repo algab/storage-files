@@ -90,12 +90,12 @@ module.exports = (app) => {
       let nomeSubPastaAtual = req.params.nomeSubPastaAtual
       let result = joi.validate(dados, model)
       if (result.error != null) {
-        res.status(409).json(result.error)
+        res.status(400).json(result.error)
       }
       else {
         fs.rename("./data/" + dados.nomePasta + "/" + nomeSubPastaAtual, "./data/" + dados.nomePasta + "/" + dados.nomeSubpasta, (err) => {
           if (err) {
-            if (err.errno == -17) {
+            if (err.errno == -39) {
               res.status(409).json({ "Mensagem": "Nessa determinada pasta já existe uma subpasta com o mesmo nome" })
             }
             if (err.errno == -2) {
