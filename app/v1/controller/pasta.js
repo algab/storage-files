@@ -55,7 +55,13 @@ module.exports = (app) => {
 
   pasta.listar = async (req, res) => {
     let nomePasta = req.params.nomePasta
-    let auth = await authDigest(req.user, nomePasta)
+    let auth = false
+    if (req.user==true) {
+      auth = await authBearer(req.headers.authorization.slice(7),nomePasta)
+    } 
+    else {
+      auth = await authDigest(req.user, nomePasta)
+    }   
     if (auth == true) {
       fs.readdir("./data/" + nomePasta, (err, data) => {
         if (err) {
@@ -73,7 +79,13 @@ module.exports = (app) => {
 
   pasta.listarSubpasta = async (req,res) => {
     let nomePasta = req.params.nomePasta
-    let auth = await authDigest(req.user, nomePasta)
+    let auth = false
+    if (req.user==true) {
+      auth = await authBearer(req.headers.authorization.slice(7),nomePasta)
+    } 
+    else {
+      auth = await authDigest(req.user, nomePasta)
+    }   
     if (auth==true) {
       fs.readdir("./data/" + nomePasta, (err, data) => {
         if (err) {
@@ -99,7 +111,13 @@ module.exports = (app) => {
 
   pasta.estatistica = async (req, res) => {
     let nomePasta = req.params.nomePasta
-    let auth = await authDigest(req.user, nomePasta)
+    let auth = false
+    if (req.user==true) {
+      auth = await authBearer(req.headers.authorization.slice(7),nomePasta)
+    } 
+    else {
+      auth = await authDigest(req.user, nomePasta)
+    }   
     if (auth == true) {
       fs.stat("./data/" + nomePasta, (err, data) => {
         if (err) {

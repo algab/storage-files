@@ -112,7 +112,13 @@ module.exports = (app) => {
 
   objeto.listarPasta = async (req, res) => {
     let nomePasta = req.params.nomePasta
-    let auth = await authDigest(req.user, nomePasta)
+    let auth = false
+    if (req.user==true) {
+      auth = await authBearer(req.headers.authorization.slice(7),nomePasta)
+    } 
+    else {
+      auth = await authDigest(req.user, nomePasta)
+    }   
     if (auth == true) {
       let nomeObjeto = req.params.nomeObjeto
       fs.stat("./data/" + nomePasta + "/" + nomeObjeto, (err, stats) => {
@@ -131,7 +137,13 @@ module.exports = (app) => {
 
   objeto.listarSubPasta = async (req, res) => {
     let nomePasta = req.params.nomePasta
-    let auth = await authDigest(req.user, nomePasta)
+    let auth = false
+    if (req.user==true) {
+      auth = await authBearer(req.headers.authorization.slice(7),nomePasta)
+    } 
+    else {
+      auth = await authDigest(req.user, nomePasta)
+    }   
     if (auth == true) {
       let nomeSubPasta = req.params.nomeSubPasta
       let nomeObjeto = req.params.nomeObjeto

@@ -37,6 +37,7 @@ module.exports = (app) => {
               let mensagem = {
                 "Mensagem": "Usuário cadastrado com sucesso",
                 "idUsuario": usuario[0].id,
+                "token": token,
                 "_links": [
                   { "rel": "Criar Pasta", "method": "POST", "href": `http://${req.headers.host}${versao}/pastas` },
                   { "rel": "Login", "method": "PUT", "href": `http://${req.headers.host}${versao}/usuarios/login` }

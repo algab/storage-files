@@ -46,7 +46,13 @@ module.exports = (app) => {
 
   subpasta.estatistica = async (req, res) => {
     let nomePasta = req.params.nomePasta
-    let auth = await authDigest(req.user,nomePasta)
+    let auth = false
+    if (req.user==true) {
+      auth = await authBearer(req.headers.authorization.slice(7),nomePasta)
+    } 
+    else {
+      auth = await authDigest(req.user, nomePasta)
+    }   
     if (auth == true) {
       let nomeSubPasta = req.params.nomeSubPasta
       fs.stat("./data/" + nomePasta + "/" + nomeSubPasta, (err, data) => {
