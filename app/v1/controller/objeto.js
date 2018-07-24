@@ -35,7 +35,7 @@ module.exports = (app) => {
             let oldpath = file.path
             let newpath = "./data/" + nomePasta + "/" + objeto
             fsExtra.move(oldpath, newpath, (err) => {
-              if (err) {
+              if (err) {                           
                 res.status(500).json({ "Mensagem": "Verifique se o nome da pasta está correto e tente novamente" }).end()
               }
               else {
@@ -234,11 +234,11 @@ module.exports = (app) => {
     let split = objeto.split(".")
     let total = 0
     for (let i = 0; i < objetos.length; i++) {
-      let pos = objetos[i].search(`${split[0]}-`)
+      let pos = objetos[i].search(`${split[0]}-`)    
       if (pos > -1) {
         total++
       }
-    }
+    }   
     return `${split[0]}-${total + 1}.${split[1]}`
   }
 

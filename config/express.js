@@ -1,5 +1,4 @@
 var express = require("express")
-var bodyParser = require("body-parser")
 var joi = require("joi")
 var consign = require("consign")
 var formidable = require("formidable")
@@ -23,8 +22,8 @@ app.set("database",db)
 app.set("hasha",hasha)
 app.set("port",3001)
 
-app.use(bodyParser.urlencoded({extended:true}))
-app.use(bodyParser.json())
+app.use(express.urlencoded({extended:true}))
+app.use(express.json())
 app.use(cors())
 
 app.disable("x-powered-by")
