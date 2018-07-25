@@ -1,10 +1,10 @@
 module.exports = (app) => {
     var joi = app.get("joi")
 
-    const folderSon = {
+    const sonfolder = {
         nameFolder: joi.string().regex(/^[a-z]+$/).required(),
-        nameFolderSon: joi.string().regex(/^[a-z]+$/).required()
+        nameSonFolder: joi.string().regex(/^[a-z]+$/).required()
     }
 
-    return folderSon
+    return sonfolder
 }

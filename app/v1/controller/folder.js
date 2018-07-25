@@ -9,8 +9,6 @@ module.exports = (app) => {
 
   var version = "/v1"
 
-  var run = util.promisify(db.run).bind(db)
-
   var all = util.promisify(db.all).bind(db)
 
   folder.create = async (req, res) => {
@@ -20,13 +18,14 @@ module.exports = (app) => {
       res.status(400).json(result.error).end()
     }
     else {
-      let usuario = await all("SELECT * FROM users WHERE nick = ?", [data.nick])
-      if (usuario.length == 0) {
+      let user = await all("SELECT * FROM users WHERE nick = ?", [data.nick])
+      if (user.length == 0) {
         res.status(404).json({ "Message": "User not found" }).end()
       }
       else {
-        try {
-          let userFolder = await all("SELECT id FROM folders WHERE idUsuario = ?", [user.id])
+        try {   
+          let userFolder = await all("SELECT id FROM folders WHERE idUser = ?", [user[0].id])
+          console.log(userFolder);          
           if (userFolder.length > 0) {
             res.status(409).json({ "Message": "User already exists a folder" }).end()
           }
@@ -36,7 +35,7 @@ module.exports = (app) => {
                 res.status(409).json({ "Message": "Folder already exists" }).end()
               }
               else {
-                db.run("INSERT INTO folders (nameFolder,idUser) VALUES (?,?)", [data.nameFolder, user.id], (err,result) => {
+                db.run("INSERT INTO folders (nameFolder,idUser) VALUES (?,?)", [data.nameFolder, user[0].id], (err,result) => {
                   let message = {
                     "Message": "Folder create successful",
                     "urlFolder": `http://${req.headers.host}/${data.nameFolder}`
@@ -55,13 +54,13 @@ module.exports = (app) => {
 
   folder.list = async (req, res) => {
     let nameFolder = req.params.nameFolder
-    let auth = false
+    let auth = false        
     if (req.user==true) {
       auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
     } 
-    else {
+    else {      
       auth = await authDigest(req.user, nameFolder)
-    }   
+    }  
     if (auth == true) {
       fs.readdir("./data/" + nameFolder, (err, data) => {
         if (err) {
@@ -167,8 +166,8 @@ module.exports = (app) => {
         res.status(400).json(result.error)
       }
       else {
-        let usuario = await all("SELECT * FROM users WHERE nick = ?", [data.idUser])
-        if (usuario.length == 0) {
+        let user = await all("SELECT id FROM users WHERE nick = ?", [data.nick])
+        if (user.length == 0) {
           res.status(404).json({ "Message": "User not found" }).end()
         }
         else {
@@ -177,8 +176,11 @@ module.exports = (app) => {
               res.status(409).json({ "Message": "Folder already exists" })
             }
             else {
-              db.run("UPDATE folders SET nomePasta = ? WHERE idUser = ?", [data.nomePasta, data.idUsuario], (err,result) => {
-                let message = {"Message":"Folder rename successful","urlFolder":`http://${req.headers.host}/${data.nomePasta}`}
+              db.run("UPDATE folders SET nameFolder = ? WHERE idUser = ?", [data.nameFolder,user[0].id], (err,result) => {
+                let message = {
+                  "Message":"Folder rename successful",
+                  "urlFolder":`http://${req.headers.host}/${data.nameFolder}`
+                }
                 res.status(200).json(message)
               })
             }
@@ -205,16 +207,20 @@ module.exports = (app) => {
           }
         }
         else {
-          let email = await all("SELECT id FROM users WHERE email = ?", [req.user])
-          let idFolder = await all("SELECT id FROM folders WHERE idUser = ?", [email[0].id])
-          db.run("DELETE FROM folders WHERE id = ?", [idFolder[0].id],(err,result) => {
-            if (err) {
-              res.status(500).json({'Message':'Server Error'})
-            }
-            else {
-              res.status(200).json({ "Mensagem": "Pasta excluida com sucesso" })
-            }
-          })
+          try {
+            let idFolder = await all("SELECT id FROM folders WHERE nameFolder = ?", [nameFolder])
+            db.run("DELETE FROM folders WHERE id = ?", [idFolder[0].id],(err,result) => {
+              if (err) {
+                res.status(500).json({'Message':'Server Error'})
+              }
+              else {
+                res.status(200).json({ "Message": "Folder removed successful" })
+              }
+            })            
+          } catch (error) {
+            fs.mkdirSync(`./data/${nameFolder}`)
+            res.status(500).json({"Message":"Server Error"})
+          }
         }
       })
     }
@@ -223,11 +229,11 @@ module.exports = (app) => {
     }
   }
 
-  async function authDigest(user, nomePasta) {
+  async function authDigest(user, nameFolder) {
     try {
       let result = await all("SELECT id FROM users WHERE nick = ?", [user])
       let folder = await all("SELECT nameFolder FROM folders WHERE idUser = ?", [result[0].id])
-      if (folder[0].nomePasta == nomePasta) {
+      if (folder[0].nameFolder == nameFolder) {
         return true
       }
       else {
@@ -238,11 +244,11 @@ module.exports = (app) => {
     }
   }
 
-  async function authBearer(token, nomePasta) {
+  async function authBearer(token, nameFolder) {
     try {
       let result = await all("SELECT id FROM users WHERE token = ?", [token])
       let folder = await all("SELECT nameFolder FROM folders WHERE idUser = ?", [result[0].id])
-      if (folder[0].nomePasta == nomePasta) {
+      if (folder[0].nameFolder == nameFolder) {
         return true
       }
       else {

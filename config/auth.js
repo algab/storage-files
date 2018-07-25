@@ -27,6 +27,16 @@ passport.use("digest", new http.DigestStrategy({ qop: "auth" },
   }
 ))
 
+passport.use("admin", new http.DigestStrategy({ qop: "auth" },
+  function (username,done) {
+    if (username == "admin") {
+      return done(null,"admin","1234")
+    } else {
+      return done(null,false)      
+    }    
+  }
+))
+
 passport.use("bearer", new httpBearer(
   async function (token, done) {
     try {

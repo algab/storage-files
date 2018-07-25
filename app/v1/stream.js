@@ -1,14 +1,14 @@
 module.exports = (app) => {
   var fs = app.get("fs")
 
-  app.get("/:nomePasta/:param", (req, res) => { 
-    let nomePasta = req.params.nomePasta
+  app.get("/:nameFolder/:param", (req, res) => { 
+    let nameFolder = req.params.nameFolder
     let param = req.params.param
-    let resultado = param.search(new RegExp("[.]"))
-    if (resultado == -1) {
-      fs.readdir(`./data/${nomePasta}/${param}`, (err, data) => {
+    let result = param.search(new RegExp("[.]"))
+    if (result == -1) {
+      fs.readdir(`./data/${nameFolder}/${param}`, (err, data) => {
         if (err) {
-          res.status(404).json({ "Mensagem": "Subpasta não encontrada" })
+          res.status(404).json({ "Message": "Son Folder not found" })
         }
         else {
           res.status(200).json(data)
@@ -16,22 +16,22 @@ module.exports = (app) => {
       })
     }
     else {
-      const objeto = fs.createReadStream(`./data/${nomePasta}/${param}`)
-      objeto.on("error", (err) => {
-        res.status(404).json({ "Mensagem": "Objeto não encontrado" })
+      const object = fs.createReadStream(`./data/${nameFolder}/${param}`)
+      object.on("error", (err) => {
+        res.status(404).json({ "Message": "Object not found" })
       })
-      objeto.pipe(res)
+      object.pipe(res)
     }
   })
 
-  app.get("/:nomePasta/:nomeSubPasta/:objeto", (req, res) => {
-    let nomePasta = req.params.nomePasta
-    let nomeSubPasta = req.params.nomeSubPasta
-    let obj = req.params.objeto
+  app.get("/:nameFolder/:nameSonFolder/:object", (req, res) => {
+    let nameFolder = req.params.nameFolder
+    let nameSonFolder = req.params.nameSonFolder
+    let obj = req.params.object
 
-    const objeto = fs.createReadStream(`./data/${nomePasta}/${nomeSubPasta}/${obj}`)
-    objeto.on("error", (err) => {
-      res.status(404).json({ "Mensagem": "Objeto não encontrado" })
+    const object = fs.createReadStream(`./data/${nameFolder}/${nameSonFolder}/${obj}`)
+    object.on("error", (err) => {
+      res.status(404).json({ "Message": "Object not found" })
     })
     objeto.pipe(res)
   })
