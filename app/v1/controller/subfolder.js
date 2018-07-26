@@ -1,17 +1,17 @@
 module.exports = (app) => {
-  var model = app.model.sonfolder
+  var model = app.model.subfolder
   var joi = app.get("joi")
   var util = app.get("util")
   var fs = app.get("fs")
   var db = app.get("database")
 
-  var sonfolder = {}
+  var subfolder = {}
 
   var version = "/v1"
 
   var all = util.promisify(db.all).bind(db)
 
-  sonfolder.create = async (req, res) => {
+  subfolder.create = async (req, res) => {
     let data = req.body
     let auth = await authBearer(req.headers.authorization.slice(7),data.nameFolder)
     if (auth == true) {
@@ -20,10 +20,10 @@ module.exports = (app) => {
         res.status(400).json(result.error)
       }
       else {
-        fs.mkdir("./data/" + data.nameFolder + "/" + data.nameSonFolder, (err) => {
+        fs.mkdir("./data/" + data.nameFolder + "/" + data.nameSubFolder, (err) => {
           if (err) {
             if (err.errno == -17) {
-              res.status(409).json({ "Message": "In that particular folder there is already a son folder with the same name" })
+              res.status(409).json({ "Message": "SubFolder with the same name already exists" })
             }
             if (err.errno == -2) {
               res.status(404).json({ "Message": "Folder not found" })
@@ -31,8 +31,8 @@ module.exports = (app) => {
           }
           else {
             let message = {
-              "Message": "SonFolder create successful",
-              "urlFolder": `http://${req.headers.host}/${data.nameFolder}/${data.nameSonFolder}`
+              "Message": "SubFolder create successful",
+              "urlFolder": `http://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
             }
             res.status(201).json(message)
           }
@@ -44,7 +44,7 @@ module.exports = (app) => {
     }
   }
 
-  sonfolder.stats = async (req, res) => {
+  subfolder.stats = async (req, res) => {
     let nameFolder = req.params.nameFolder
     let auth = false
     if (req.user==true) {
@@ -54,24 +54,24 @@ module.exports = (app) => {
       auth = await authDigest(req.user, nameFolder)
     }   
     if (auth == true) {
-      let nameSonFolder = req.params.nameSonFolder
-      fs.stat("./data/" + nameFolder + "/" + nameSonFolder, (err, data) => {
+      let nameSubFolder = req.params.nameSubFolder
+      fs.stat("./data/" + nameFolder + "/" + nameSubFolder, (err, data) => {
         if (err) {
-          res.status(404).json({ "Message": "Verify that the folder and son folder name is correct" })
+          res.status(404).json({ "Message": "Verify that the Folder name and SubFolder is correct" })
         }
         else {
           doc = {
             "Created": {
               "Date": generateDate(data.birthtime),
-              "Time": genereateTime(data.birthtime)
+              "Time": generateTime(data.birthtime)
             },
             "Access": {
               "Date": generateDate(data.atime),
-              "Time": genereateTime(data.atime)
+              "Time": generateTime(data.atime)
             },
             "Modified": {
               "Date": generateDate(data.mtime),
-              "Time": genereateTime(data.mtime)
+              "Time": generateTime(data.mtime)
             }
           }
           res.status(200).json(doc)
@@ -83,20 +83,20 @@ module.exports = (app) => {
     }
   }
 
-  sonfolder.edit = async (req, res) => {
+  subfolder.edit = async (req, res) => {
     let data = req.body
     let auth = await authBearer(req.headers.authorization.slice(7),data.nameFolder)
     if (auth == true) {
-      let nameSonFolderCurrent = req.params.nameSonFolderCurrent
+      let nameSubFolderCurrent = req.params.nameSubFolderCurrent
       let result = joi.validate(data, model)
       if (result.error != null) {
         res.status(400).json(result.error)
       }
       else {
-        fs.rename("./data/" + data.nameFolder + "/" + nameSonFolderCurrent, "./data/" + data.nameFolder + "/" + data.nameSonFolder, (err) => {
+        fs.rename("./data/" + data.nameFolder + "/" + nameSubFolderCurrent, "./data/" + data.nameFolder + "/" + data.nameSubFolder, (err) => {
           if (err) {
             if (err.errno == -17) {
-              res.status(409).json({ "Message": "In that particular folder there is already a son folder with the same name" })
+              res.status(409).json({ "Message": "SubFolder with the same name already exists" })
             }
             if (err.errno == -2) {
               res.status(404).json({ "Message": "Folder not found" })
@@ -104,8 +104,8 @@ module.exports = (app) => {
           }
           else {
             let message = {
-              "Message": "SonFolder rename successful",
-              "urlFolder": `http://${req.headers.host}/${data.nameFolder}/${data.nameSonFolder}`
+              "Message": "SubFolder rename successful",
+              "urlFolder": `http://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
             }
             res.status(200).json(message)
           }
@@ -117,22 +117,22 @@ module.exports = (app) => {
     }
   }
 
-  sonfolder.delete = async (req, res) => {
+  subfolder.delete = async (req, res) => {
     let nameFolder = req.params.nameFolder
     let auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
     if (auth == true) {
-      let nameSonFolder = req.params.nameSonFolder
-      fs.rmdir("./data/" + nameFolder + "/" + nameSonFolder, (err) => {
+      let nameSubFolder = req.params.nameSubFolder
+      fs.rmdir("./data/" + nameFolder + "/" + nameSubFolder, (err) => {
         if (err) {
           if (err.errno == -17) {
-            res.status(409).json({ "Message": "Son Folder is not empty" })
+            res.status(409).json({ "Message": "Sub Folder is not empty" })
           }
           if (err.errno == -2) {
             res.status(404).json({ "Message": "Folder not found" })
           }    
         }
         else {
-          res.status(200).json({ "Message": "Son Folder removed successful" })
+          res.status(200).json({ "Message": "Sub Folder removed successful" })
         }
       })
     }
@@ -172,14 +172,14 @@ module.exports = (app) => {
   }
 
   function generateDate(time) {
-    let data = new Date(time)
-    return `${data.getDate()}/${data.getMonth()}/${data.getFullYear()}`
+    let date = new Date(time)
+    return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
   }
 
-  function genereateTime(time) {
-    let hora = new Date(time)
-    return `${hora.getHours()}:${hora.getMinutes()}:${hora.getSeconds()}`
+  function generateTime(time) {
+    let hour = new Date(time)
+    return `${hour.getHours()}:${hour.getMinutes()}:${hour.getSeconds()}`
   }
 
-  return sonfolder
+  return subfolder
 }

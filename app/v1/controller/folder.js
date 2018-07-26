@@ -86,7 +86,7 @@ module.exports = (app) => {
     }
   }
 
-  folder.listFolderSon = async (req,res) => {
+  folder.listSubFolder = async (req,res) => {
     let nameFolder = req.params.nameFolder
     let auth = false
     if (req.user==true) {
@@ -260,13 +260,13 @@ module.exports = (app) => {
   }
 
   function generateDate(time) {
-    let data = new Date(time)
-    return `${data.getDate()}/${data.getMonth()}/${data.getFullYear()}`
+    let date = new Date(time)
+    return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
   }
 
   function generateTime(time) {
-    let hora = new Date(time)
-    return `${hora.getHours()}:${hora.getMinutes()}:${hora.getSeconds()}`
+    let hour = new Date(time)
+    return `${hour.getHours()}:${hour.getMinutes()}:${hour.getSeconds()}`
   }
 
 
