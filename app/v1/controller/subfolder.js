@@ -60,21 +60,30 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "Verify that the Folder name and SubFolder is correct" })
         }
         else {
-          doc = {
-            "Created": {
-              "Date": generateDate(data.birthtime),
-              "Time": generateTime(data.birthtime)
-            },
-            "Access": {
-              "Date": generateDate(data.atime),
-              "Time": generateTime(data.atime)
-            },
-            "Modified": {
-              "Date": generateDate(data.mtime),
-              "Time": generateTime(data.mtime)
+          const size = app.get("getFolder") 
+          size(`./data/${nameFolder}/${nameSubFolder}`,(err,size) => {
+            if(err) {
+              res.status(500).json({"Message":"Server Error"}).end()
             }
-          }
-          res.status(200).json(doc)
+            else {             
+              let doc = {
+                "Created": {
+                  "Date": generateDate(data.atime),
+                  "Time": generateTime(data.atime)
+                },
+                "Access": {
+                  "Date": generateDate(data.birthtime),
+                  "Time": generateTime(data.birthtime)
+                },
+                "Modified": {
+                  "Date": generateDate(data.mtime),
+                  "Time": generateTime(data.mtime)
+                },
+                "Size": size
+              }
+              res.status(200).json(doc)
+            }
+          })  
         }
       })
     }

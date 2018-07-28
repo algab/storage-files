@@ -93,7 +93,7 @@ module.exports = (app) => {
 
   user.login = (req, res) => {
     let data = req.body
-    if (data.email && data.password) {
+    if (data.email && data.password) {      
       db.all("SELECT * FROM users WHERE email = ? and password = ?", [data.email, data.password], (err, result) => {
         if (err) {
           res.status(500).json(err).end()

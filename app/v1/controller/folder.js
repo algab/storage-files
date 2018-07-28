@@ -62,22 +62,51 @@ module.exports = (app) => {
       auth = await authDigest(req.user, nameFolder)
     }  
     if (auth == true) {
+      let type = req.query.type
       fs.readdir("./data/" + nameFolder, (err, data) => {
         if (err) {
           res.status(404).json({ "Message": "Folder not found" }).end()
         }
         else {
           if (data.length > 0) {
-            for (let i = 0; i < data.length; i++) {
-              if (data[i].search(new RegExp("[.]")) == -1) {
-                data[i] = {"id":i,"name":data[i],"type":"folder"}
+            if (type) {
+              if (type == "folder") {
+                folder = []
+                for (let i = 0; i < data.length; i++) {
+                  if(data[i].search(new RegExp("[.]")) == -1) {
+                    folder.push({"id":i,"name":data[i],"type":"folder"})
+                  }
+                }
+                res.status(200).json(folder).end()
+              }
+              else if (type == "object") {
+                object = []
+                for (let i = 0; i < data.length; i++) {
+                  if(data[i].search(new RegExp("[.]")) != -1) {
+                    object.push({"id":i,"name":data[i],"type":"object"})
+                  }
+                }
+                res.status(200).json(object).end()                
               }
               else {
-                data[i] = {"id":i,"name":data[i],"type":"object"}
-              }                  
+                res.status(200).json([]).end()
+              }
+            }
+            else {
+              for (let i = 0; i < data.length; i++) {
+                if (data[i].search(new RegExp("[.]")) == -1) {
+                  data[i] = {"id":i,"name":data[i],"type":"folder"}
+                }
+                else {
+                  data[i] = {"id":i,"name":data[i],"type":"object"}
+                }                  
+              }
+              res.status(200).json(data).end()              
             }
           }
-          res.status(200).json(data).end()
+          else {
+            res.status(200).json(data).end()
+          }
         }
       })
     }
@@ -101,15 +130,15 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "Folder not found" }).end()
         }
         else {
-          let folderSon = []
+          let subFolder = []
           for(let i=0;i<data.length;i++) {
             if (data[i].search(new RegExp("[.]")) == -1) {
-              let stats = fs.statSync(`./data/${nomeFolder}/${data[i]}`)            
+              let stats = fs.statSync(`./data/${nameFolder}/${data[i]}`)            
               doc = {'name': data[i],'data': stats}
-              folderSon.push(doc)              
+              subFolder.push(doc)              
             }
           }
-          res.status(200).json(folderSon).end()
+          res.status(200).json(subFolder).end()
         }
       })
     } 
@@ -133,21 +162,30 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "Folder not found" }).end()
         }
         else {
-          doc = {
-            "Created": {
-              "Date": generateDate(data.birthtime),
-              "Time": generateTime(data.birthtime)
-            },
-            "Access": {
-              "Date": generateDate(data.atime),
-              "Time": generateTime(data.atime)
-            },
-            "Modified": {
-              "Date": generateDate(data.mtime),
-              "Time": generateTime(data.mtime)
+          const size = app.get("getFolder") 
+          size(`./data/${nameFolder}`,(err,size) => {
+            if(err) {
+              res.status(500).json({"Message":"Server Error"}).end()
+            }            
+            else {          
+              let doc = {
+                "Created": {
+                  "Date": generateDate(data.atime),
+                  "Time": generateTime(data.atime)
+                },
+                "Access": {
+                  "Date": generateDate(data.birthtime),
+                  "Time": generateTime(data.birthtime)
+                },
+                "Modified": {
+                  "Date": generateDate(data.mtime),
+                  "Time": generateTime(data.mtime)
+                },
+                "Size": size
+              }
+              res.status(200).json(doc).end()
             }
-          }
-          res.status(200).json(doc)
+          })                   
         }
       })
     }
