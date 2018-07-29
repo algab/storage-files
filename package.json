@@ -20,6 +20,7 @@
     "passport": "^0.4.0",
     "passport-http": "^0.3.0",
     "passport-http-bearer": "^1.0.1",
+    "socket.io": "^2.1.1",
     "sqlite3": "^4.0.2"
   }
 }

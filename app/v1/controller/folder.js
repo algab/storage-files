@@ -162,7 +162,7 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "Folder not found" }).end()
         }
         else {
-          const size = app.get("getFolder") 
+          const size = app.get("sizeFolder") 
           size(`./data/${nameFolder}`,(err,size) => {
             if(err) {
               res.status(500).json({"Message":"Server Error"}).end()

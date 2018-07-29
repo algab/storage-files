@@ -21,9 +21,16 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "Folder not found" })
         }
         else {
-          let form = new formidable.IncomingForm()
+          let io = app.get("io")
+          let token = req.headers.authorization.slice(7)
+          let form = new formidable.IncomingForm()    
 
           form.parse(req, (err, fields, files) => { })
+
+          form.on("progress",(rec,exp) => {
+            let total = (rec/exp) * 100
+            io.emit(token,`${total.toFixed(0)}%`)
+          })
 
           form.on('file', (name, file) => {
             let object = file.name
@@ -41,7 +48,7 @@ module.exports = (app) => {
               else {
                 let message = {
                   "Message": "Object save successful",
-                  "urlObjeto": `http://${req.headers.host}/${nameFolder}/${object}`
+                  "urlObject": `http://${req.headers.host}/${nameFolder}/${object}`
                 }
                 res.status(200).json(message).end()
               }
@@ -76,9 +83,16 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "SubFolder not found" })
         }
         else {
+          let io = app.get("io")
+          let token = req.headers.authorization.slice(7)
           let form = new formidable.IncomingForm()
 
           form.parse(req, (err, fields, files) => { })
+
+          form.on("progress",(rec,exp) => {
+            let total = (rec/exp) * 100
+            io.emit(token,`${total.toFixed(0)}%`)
+          })
 
           form.on('file', (name, file) => {
             let object = file.name
@@ -96,7 +110,7 @@ module.exports = (app) => {
               else {
                 let message = {
                   "Message": "Object save successful",
-                  "urlObjeto": `http://${req.headers.host}/${nameFolder}/${nameSubFolder}/${object}`
+                  "urlObject": `http://${req.headers.host}/${nameFolder}/${nameSubFolder}/${object}`
                 }
                 res.status(200).json(message).end()
               }
