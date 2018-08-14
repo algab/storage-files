@@ -33,8 +33,8 @@ module.exports = (app) => {
               res.status(500).json({ "Message" : "Server Error" }).end()
             }
             else {
-              let usuario = await all("SELECT id FROM users ORDER BY id DESC LIMIT 1")
-              let message = {"Message": "User save successful","idUser": usuario[0].id,"token": token}
+              let user = await all("SELECT id FROM users ORDER BY id DESC LIMIT 1")
+              let message = {"Message": "User save successful","idUser": user[0].id,"token": token}
               message['_links'] = [
                 { "rel": "Create Folder", "method": "POST", "href": `http://${req.headers.host}${version}/users` },
                 { "rel": "Login", "method": "PUT", "href": `http://${req.headers.host}${version}/users/login` }

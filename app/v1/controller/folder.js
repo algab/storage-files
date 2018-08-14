@@ -11,6 +11,8 @@ module.exports = (app) => {
 
   var all = util.promisify(db.all).bind(db)
 
+  var size = util.promisify(app.get("sizeFolder"))
+
   folder.create = async (req, res) => {
     let data = req.body
     let result = joi.validate(data, model)
@@ -24,8 +26,7 @@ module.exports = (app) => {
       }
       else {
         try {   
-          let userFolder = await all("SELECT id FROM folders WHERE idUser = ?", [user[0].id])
-          console.log(userFolder);          
+          let userFolder = await all("SELECT id FROM folders WHERE idUser = ?", [user[0].id])         
           if (userFolder.length > 0) {
             res.status(409).json({ "Message": "User already exists a folder" }).end()
           }
@@ -114,39 +115,7 @@ module.exports = (app) => {
       res.status(401).send("Unauthorized").end()
     }
   }
-
-  folder.listSubFolder = async (req,res) => {
-    let nameFolder = req.params.nameFolder
-    let auth = false
-    if (req.user==true) {
-      auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
-    } 
-    else {
-      auth = await authDigest(req.user, nameFolder)
-    }   
-    if (auth==true) {
-      fs.readdir("./data/" + nameFolder, (err, data) => {
-        if (err) {
-          res.status(404).json({ "Message": "Folder not found" }).end()
-        }
-        else {
-          let subFolder = []
-          for(let i=0;i<data.length;i++) {
-            if (data[i].search(new RegExp("[.]")) == -1) {
-              let stats = fs.statSync(`./data/${nameFolder}/${data[i]}`)            
-              doc = {'name': data[i],'data': stats}
-              subFolder.push(doc)              
-            }
-          }
-          res.status(200).json(subFolder).end()
-        }
-      })
-    } 
-    else {
-      res.status(401).send("Unauthorized").end()
-    }
-  }
-
+  
   folder.stats = async (req, res) => {
     let nameFolder = req.params.nameFolder
     let auth = false
@@ -157,31 +126,36 @@ module.exports = (app) => {
       auth = await authDigest(req.user, nameFolder)
     }   
     if (auth == true) {
-      fs.stat("./data/" + nameFolder, (err, data) => {
+      fs.stat("./data/" + nameFolder, async (err, data) => {
         if (err) {
           res.status(404).json({ "Message": "Folder not found" }).end()
         }
-        else {
-          const size = app.get("sizeFolder") 
-          size(`./data/${nameFolder}`,(err,size) => {
+        else {          
+          let total = 0
+          let dataFolder = fs.readdirSync(`./data/${nameFolder}`)                    
+          let folders = dataFolder.filter(elem => elem.search(new RegExp("[.]")) == -1)          
+          for (let i = 0; i < folders.length; i++) {
+            total += await size(`./data/${nameFolder}/${folders[0]}`)
+          }           
+          app.get("sizeFolder")(`./data/${nameFolder}`,(err,size) => {
             if(err) {
               res.status(500).json({"Message":"Server Error"}).end()
             }            
             else {          
               let doc = {
-                "Created": {
-                  "Date": generateDate(data.atime),
-                  "Time": generateTime(data.atime)
+                "created": {
+                  "date": generateDate(data.atime),
+                  "time": generateTime(data.atime)
                 },
-                "Access": {
-                  "Date": generateDate(data.birthtime),
-                  "Time": generateTime(data.birthtime)
+                "access": {
+                  "date": generateDate(data.birthtime),
+                  "time": generateTime(data.birthtime)
                 },
-                "Modified": {
-                  "Date": generateDate(data.mtime),
-                  "Time": generateTime(data.mtime)
+                "modified": {
+                  "date": generateDate(data.mtime),
+                  "time": generateTime(data.mtime)
                 },
-                "Size": size
+                "size": size + total
               }
               res.status(200).json(doc).end()
             }
@@ -240,7 +214,7 @@ module.exports = (app) => {
           if (err.errno == -2) {
             res.status(404).json({ "Message": "Folder not found" })
           }
-          if (err.errno == -39) {
+          if (err.errno == -17 || err.errno == -39) {
             res.status(409).json({ "Message": "Folder is not empty" })
           }
         }

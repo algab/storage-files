@@ -67,19 +67,19 @@ module.exports = (app) => {
             }
             else {             
               let doc = {
-                "Created": {
-                  "Date": generateDate(data.atime),
-                  "Time": generateTime(data.atime)
+                "created": {
+                  "date": generateDate(data.atime),
+                  "time": generateTime(data.atime)
                 },
-                "Access": {
-                  "Date": generateDate(data.birthtime),
-                  "Time": generateTime(data.birthtime)
+                "access": {
+                  "date": generateDate(data.birthtime),
+                  "time": generateTime(data.birthtime)
                 },
-                "Modified": {
-                  "Date": generateDate(data.mtime),
-                  "Time": generateTime(data.mtime)
+                "modified": {
+                  "date": generateDate(data.mtime),
+                  "time": generateTime(data.mtime)
                 },
-                "Size": size
+                "size": size
               }
               res.status(200).json(doc)
             }
@@ -132,9 +132,9 @@ module.exports = (app) => {
     if (auth == true) {
       let nameSubFolder = req.params.nameSubFolder
       fs.rmdir("./data/" + nameFolder + "/" + nameSubFolder, (err) => {
-        if (err) {
-          if (err.errno == -17) {
-            res.status(409).json({ "Message": "Sub Folder is not empty" })
+        if (err) {          
+          if (err.errno == -17 || err.errno == -39) {
+            res.status(409).json({ "Message": "Subfolder is not empty" })
           }
           if (err.errno == -2) {
             res.status(404).json({ "Message": "Folder not found" })

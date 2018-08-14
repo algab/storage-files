@@ -29,7 +29,7 @@ module.exports = (app) => {
 
           form.on("progress",(rec,exp) => {
             let total = (rec/exp) * 100
-            io.emit(token,`${total.toFixed(0)}%`)
+            io.emit(token, {"percent":parseInt(total)})
           })
 
           form.on('file', (name, file) => {
@@ -91,7 +91,7 @@ module.exports = (app) => {
 
           form.on("progress",(rec,exp) => {
             let total = (rec/exp) * 100
-            io.emit(token,`${total.toFixed(0)}%`)
+            io.emit(token, {"percent":parseInt(total)})
           })
 
           form.on('file', (name, file) => {

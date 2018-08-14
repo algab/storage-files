@@ -13,7 +13,9 @@ const auth = require("./auth")
 const db = require("./database")
 
 var app = express()
+
 var io = new server(3002)
+io.set('origins', '*:*')
 
 app.set("joi",joi)
 app.set("formidable",formidable)
