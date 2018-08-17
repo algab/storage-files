@@ -1,3 +1,4 @@
+require("dotenv").load()
 const app = require("./config/express")
 
 app.listen(app.get("port"),() => {

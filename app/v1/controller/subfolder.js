@@ -32,7 +32,7 @@ module.exports = (app) => {
           else {
             let message = {
               "Message": "SubFolder create successful",
-              "urlFolder": `http://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
+              "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
             }
             res.status(201).json(message)
           }
@@ -60,8 +60,7 @@ module.exports = (app) => {
           res.status(404).json({ "Message": "Verify that the Folder name and SubFolder is correct" })
         }
         else {
-          const size = app.get("sizeFolder") 
-          size(`./data/${nameFolder}/${nameSubFolder}`,(err,size) => {
+          app.get("sizeFolder")(`./data/${nameFolder}/${nameSubFolder}`,(err,size) => {
             if(err) {
               res.status(500).json({"Message":"Server Error"}).end()
             }
@@ -114,7 +113,7 @@ module.exports = (app) => {
           else {
             let message = {
               "Message": "SubFolder rename successful",
-              "urlFolder": `http://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
+              "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
             }
             res.status(200).json(message)
           }

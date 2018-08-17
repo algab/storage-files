@@ -36,8 +36,8 @@ module.exports = (app) => {
               let user = await all("SELECT id FROM users ORDER BY id DESC LIMIT 1")
               let message = {"Message": "User save successful","idUser": user[0].id,"token": token}
               message['_links'] = [
-                { "rel": "Create Folder", "method": "POST", "href": `http://${req.headers.host}${version}/users` },
-                { "rel": "Login", "method": "PUT", "href": `http://${req.headers.host}${version}/users/login` }
+                { "rel": "Create Folder", "method": "POST", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users` },
+                { "rel": "Login", "method": "PUT", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/login` }
               ]
               res.status(201).json(message)
             }
@@ -56,8 +56,8 @@ module.exports = (app) => {
       }
       else {
         result.push([
-          { "rel": "Create Folder", "method": "POST", "href": `http://${req.headers.host}${version}/users` },
-          { "rel": "Login", "method": "PUT", "href": `http://${req.headers.host}${version}/users/login` }
+          { "rel": "Create Folder", "method": "POST", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users` },
+          { "rel": "Login", "method": "PUT", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/login` }
         ])
         res.status(200).json(result).end()
       }
@@ -81,8 +81,8 @@ module.exports = (app) => {
               user.nameFolder = result[0].nameFolder
             }
             user._links = [
-              { "rel": "Edit User", "method": "PUT", "href": `http://${req.headers.host}${version}/users/${id}` },
-              { "rel": "Delete User", "method": "DELETE", "href": `http://${req.headers.host}${version}/users/${id}` }
+              { "rel": "Edit User", "method": "PUT", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/${id}` },
+              { "rel": "Delete User", "method": "DELETE", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/${id}` }
             ]
             res.status(200).json(user)
           })
@@ -109,8 +109,8 @@ module.exports = (app) => {
                 user.nameFolder = result[0].nameFolder
               } 
               user._links = [
-                { "rel": "Create User", "method": "POST", "href": `http://${req.headers.host}${version}/users` },
-                { "rel": "Create Folder", "method": "POST", "href": `http://${req.headers.host}${version}/pastas` }
+                { "rel": "Create User", "method": "POST", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users` },
+                { "rel": "Create Folder", "method": "POST", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/pastas` }
               ]
               res.status(200).json(user).end()
             })
@@ -138,8 +138,8 @@ module.exports = (app) => {
         else {
           let message = {"Message": "User updated successful"}
           message['_links'] = [
-            { "rel": "Found User", "method": "GET", "href": `http://${req.headers.host}${version}/users/${id}` },
-            { "rel": "Delete User", "method": "DELETE", "href": `http://${req.headers.host}${version}/users/${id}` }
+            { "rel": "Found User", "method": "GET", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/${id}` },
+            { "rel": "Delete User", "method": "DELETE", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/${id}` }
           ]
           res.status(200).json(message).end()
         }
@@ -156,8 +156,8 @@ module.exports = (app) => {
       else {
         let mensagem = {"Message": "User removed successful"}
         message['_links'] = [
-          { "rel": "Found User", "method": "GET", "href": `http://${req.headers.host}${version}/users/${id}` },
-          { "rel": "Edit User", "method": "PUT", "href": `http://${req.headers.host}${version}/users/${id}` }
+          { "rel": "Found User", "method": "GET", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/${id}` },
+          { "rel": "Edit User", "method": "PUT", "href": `${process.env.PROTOCOL}://${req.headers.host}${version}/users/${id}` }
         ]
         res.status(200).json(message).end()
       }

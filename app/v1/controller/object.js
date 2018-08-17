@@ -23,13 +23,13 @@ module.exports = (app) => {
         else {
           let io = app.get("io")
           let token = req.headers.authorization.slice(7)
-          let form = new formidable.IncomingForm()    
+          let form = new formidable.IncomingForm()
 
           form.parse(req, (err, fields, files) => { })
 
-          form.on("progress",(rec,exp) => {
-            let total = (rec/exp) * 100
-            io.emit(token, {"percent":parseInt(total)})
+          form.on("progress", (rec, exp) => {
+            let total = (rec / exp) * 100
+            io.emit(token, { "percent": parseInt(total) })
           })
 
           form.on('file', (name, file) => {
@@ -42,13 +42,18 @@ module.exports = (app) => {
             let oldpath = file.path
             let newpath = `./data/${nameFolder}/${object}`
             fsExtra.move(oldpath, newpath, (err) => {
-              if (err) {                           
-                res.status(500).json({ "Message": "Make sure the folder name is correct and try again" }).end()
+              if (err) {
+                if (err.errno == -17) {
+                  res.status(409).json({ "Message": "File already exists" }).end()
+                }
+                else {
+                  res.status(500).json({ "Message": "Make sure the folder name is correct and try again" }).end()
+                }
               }
               else {
                 let message = {
                   "Message": "Object save successful",
-                  "urlObject": `http://${req.headers.host}/${nameFolder}/${object}`
+                  "urlObject": `${process.env.PROTOCOL}://${req.headers.host}/${nameFolder}/${object}`
                 }
                 res.status(200).json(message).end()
               }
@@ -89,9 +94,9 @@ module.exports = (app) => {
 
           form.parse(req, (err, fields, files) => { })
 
-          form.on("progress",(rec,exp) => {
-            let total = (rec/exp) * 100
-            io.emit(token, {"percent":parseInt(total)})
+          form.on("progress", (rec, exp) => {
+            let total = (rec / exp) * 100
+            io.emit(token, { "percent": parseInt(total) })
           })
 
           form.on('file', (name, file) => {
@@ -105,12 +110,17 @@ module.exports = (app) => {
             let newpath = `./data/${nameFolder}/${nameSubFolder}/${object}`
             fsExtra.move(oldpath, newpath, (err) => {
               if (err) {
-                res.status(500).json({ "Message": "Make sure the Folder name and SubFolder is correct and try again" }).end()
+                if (err.errno == -17) {
+                  res.status(409).json({ "Message": "File already exists" }).end()
+                }
+                else {
+                  res.status(500).json({ "Message": "Make sure the folder name is correct and try again" }).end()
+                }
               }
               else {
                 let message = {
                   "Message": "Object save successful",
-                  "urlObject": `http://${req.headers.host}/${nameFolder}/${nameSubFolder}/${object}`
+                  "urlObject": `${process.env.PROTOCOL}://${req.headers.host}/${nameFolder}/${nameSubFolder}/${object}`
                 }
                 res.status(200).json(message).end()
               }
@@ -118,7 +128,7 @@ module.exports = (app) => {
           })
         }
       }
-    } 
+    }
     else {
       res.status(401).send('Unauthorized')
     }
@@ -127,12 +137,12 @@ module.exports = (app) => {
   object.listFolder = async (req, res) => {
     let nameFolder = req.params.nameFolder
     let auth = false
-    if (req.user==true) {
-      auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
-    } 
+    if (req.user == true) {
+      auth = await authBearer(req.headers.authorization.slice(7), nameFolder)
+    }
     else {
       auth = await authDigest(req.user, nameFolder)
-    }   
+    }
     if (auth == true) {
       let nameObject = req.params.nameObject
       fs.stat("./data/" + nameFolder + "/" + nameObject, (err, stats) => {
@@ -152,12 +162,12 @@ module.exports = (app) => {
   object.listSubFolder = async (req, res) => {
     let nameFolder = req.params.nameFolder
     let auth = false
-    if (req.user==true) {
-      auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
-    } 
+    if (req.user == true) {
+      auth = await authBearer(req.headers.authorization.slice(7), nameFolder)
+    }
     else {
       auth = await authDigest(req.user, nameFolder)
-    }   
+    }
     if (auth == true) {
       let nameSubFolder = req.params.nameSubFolder
       let nameObject = req.params.nameObject
@@ -248,11 +258,11 @@ module.exports = (app) => {
     let split = object.split(".")
     let total = 0
     for (let i = 0; i < objects.length; i++) {
-      let pos = objects[i].search(`${split[0]}-`)    
+      let pos = objects[i].search(`${split[0]}-`)
       if (pos > -1) {
         total++
       }
-    }   
+    }
     return `${split[0]}-${total + 1}.${split[1]}`
   }
 
