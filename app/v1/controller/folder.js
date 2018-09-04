@@ -39,7 +39,7 @@ module.exports = (app) => {
                 db.run("INSERT INTO folders (nameFolder,idUser) VALUES (?,?)", [data.nameFolder, user[0].id], (err,result) => {
                   let message = {
                     "Message": "Folder create successful",
-                    "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${data.nameFolder}`
+                    "urlFolder": `${process.env.protocol}://${req.headers.host}/${data.nameFolder}`
                   }
                   res.status(201).json(message).end()
                 })
@@ -191,7 +191,7 @@ module.exports = (app) => {
               db.run("UPDATE folders SET nameFolder = ? WHERE idUser = ?", [data.nameFolder,user[0].id], (err,result) => {
                 let message = {
                   "Message":"Folder rename successful",
-                  "urlFolder":`${process.env.PROTOCOL}://${req.headers.host}/${data.nameFolder}`
+                  "urlFolder":`${process.env.protocol}://${req.headers.host}/${data.nameFolder}`
                 }
                 res.status(200).json(message)
               })

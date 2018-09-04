@@ -53,7 +53,7 @@ module.exports = (app) => {
               else {
                 let message = {
                   "Message": "Object save successful",
-                  "urlObject": `${process.env.PROTOCOL}://${req.headers.host}/${nameFolder}/${object}`
+                  "urlObject": `${process.env.protocol}://${req.headers.host}/${nameFolder}/${object}`
                 }
                 res.status(200).json(message).end()
               }
@@ -120,7 +120,7 @@ module.exports = (app) => {
               else {
                 let message = {
                   "Message": "Object save successful",
-                  "urlObject": `${process.env.PROTOCOL}://${req.headers.host}/${nameFolder}/${nameSubFolder}/${object}`
+                  "urlObject": `${process.env.protocol}://${req.headers.host}/${nameFolder}/${nameSubFolder}/${object}`
                 }
                 res.status(200).json(message).end()
               }

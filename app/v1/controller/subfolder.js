@@ -32,7 +32,7 @@ module.exports = (app) => {
           else {
             let message = {
               "Message": "SubFolder create successful",
-              "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
+              "urlFolder": `${process.env.protocol}://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
             }
             res.status(201).json(message)
           }
@@ -113,7 +113,7 @@ module.exports = (app) => {
           else {
             let message = {
               "Message": "SubFolder rename successful",
-              "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
+              "urlFolder": `${process.env.protocol}://${req.headers.host}/${data.nameFolder}/${data.nameSubFolder}`
             }
             res.status(200).json(message)
           }
