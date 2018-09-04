@@ -18,6 +18,6 @@ EXPOSE 3001
 
 CMD ["npm","start"]
 
-RUN sqlite3 storage.db < storage.sql
+RUN sqlite3 data/storage.db < storage.sql
 
 VOLUME /home/node/app/data
