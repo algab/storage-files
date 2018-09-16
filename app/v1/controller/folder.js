@@ -25,8 +25,8 @@ module.exports = (app) => {
         res.status(404).json({ "Message": "User not found" }).end()
       }
       else {
-        try {   
-          let userFolder = await all("SELECT id FROM folders WHERE idUser = ?", [user[0].id])         
+        try {
+          let userFolder = await all("SELECT id FROM folders WHERE idUser = ?", [user[0].id])
           if (userFolder.length > 0) {
             res.status(409).json({ "Message": "User already exists a folder" }).end()
           }
@@ -36,7 +36,7 @@ module.exports = (app) => {
                 res.status(409).json({ "Message": "Folder already exists" }).end()
               }
               else {
-                db.run("INSERT INTO folders (nameFolder,idUser) VALUES (?,?)", [data.nameFolder, user[0].id], (err,result) => {
+                db.run("INSERT INTO folders (nameFolder,idUser) VALUES (?,?)", [data.nameFolder, user[0].id], (err, result) => {
                   let message = {
                     "Message": "Folder create successful",
                     "urlFolder": `${process.env.protocol}://${req.headers.host}/${data.nameFolder}`
@@ -55,220 +55,154 @@ module.exports = (app) => {
 
   folder.list = async (req, res) => {
     let nameFolder = req.params.nameFolder
-    let auth = false        
-    if (req.user==true) {
-      auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
-    } 
-    else {      
-      auth = await authDigest(req.user, nameFolder)
-    }  
-    if (auth == true) {
-      let type = req.query.type
-      fs.readdir("./data/" + nameFolder, (err, data) => {
-        if (err) {
-          res.status(404).json({ "Message": "Folder not found" }).end()
-        }
-        else {
-          if (data.length > 0) {
-            if (type) {
-              if (type == "folder") {
-                folder = []
-                for (let i = 0; i < data.length; i++) {
-                  if(data[i].search(new RegExp("[.]")) == -1) {
-                    folder.push({"id":i,"name":data[i],"type":"folder"})
-                  }
-                }
-                res.status(200).json(folder).end()
-              }
-              else if (type == "object") {
-                object = []
-                for (let i = 0; i < data.length; i++) {
-                  if(data[i].search(new RegExp("[.]")) != -1) {
-                    object.push({"id":i,"name":data[i],"type":"object"})
-                  }
-                }
-                res.status(200).json(object).end()                
-              }
-              else {
-                res.status(200).json([]).end()
-              }
-            }
-            else {
+    let type = req.query.type
+    fs.readdir("./data/" + nameFolder, (err, data) => {
+      if (err) {
+        res.status(404).json({ "Message": "Folder not found" }).end()
+      }
+      else {
+        if (data.length > 0) {
+          if (type) {
+            if (type == "folder") {
+              folder = []
               for (let i = 0; i < data.length; i++) {
                 if (data[i].search(new RegExp("[.]")) == -1) {
-                  data[i] = {"id":i,"name":data[i],"type":"folder"}
+                  folder.push({ "id": i, "name": data[i], "type": "folder" })
                 }
-                else {
-                  data[i] = {"id":i,"name":data[i],"type":"object"}
-                }                  
               }
-              res.status(200).json(data).end()              
+              res.status(200).json(folder).end()
+            }
+            else if (type == "object") {
+              object = []
+              for (let i = 0; i < data.length; i++) {
+                if (data[i].search(new RegExp("[.]")) != -1) {
+                  object.push({ "id": i, "name": data[i], "type": "object" })
+                }
+              }
+              res.status(200).json(object).end()
+            }
+            else {
+              res.status(200).json([]).end()
             }
           }
           else {
+            for (let i = 0; i < data.length; i++) {
+              if (data[i].search(new RegExp("[.]")) == -1) {
+                data[i] = { "id": i, "name": data[i], "type": "folder" }
+              }
+              else {
+                data[i] = { "id": i, "name": data[i], "type": "object" }
+              }
+            }
             res.status(200).json(data).end()
           }
         }
-      })
-    }
-    else {
-      res.status(401).send("Unauthorized").end()
-    }
+        else {
+          res.status(200).json(data).end()
+        }
+      }
+    })
   }
-  
+
   folder.stats = async (req, res) => {
     let nameFolder = req.params.nameFolder
-    let auth = false
-    if (req.user==true) {
-      auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
-    } 
-    else {
-      auth = await authDigest(req.user, nameFolder)
-    }   
-    if (auth == true) {
-      fs.stat("./data/" + nameFolder, async (err, data) => {
-        if (err) {
-          res.status(404).json({ "Message": "Folder not found" }).end()
+    fs.stat("./data/" + nameFolder, async (err, data) => {
+      if (err) {
+        res.status(404).json({ "Message": "Folder not found" }).end()
+      }
+      else {        
+        let total = 0
+        let dataFolder = fs.readdirSync(`./data/${nameFolder}`)
+        let folders = dataFolder.filter(elem => elem.search(new RegExp("[.]")) == -1)
+        for (let i = 0; i < folders.length; i++) {
+          total += await size(`./data/${nameFolder}/${folders[0]}`)
         }
-        else {          
-          let total = 0
-          let dataFolder = fs.readdirSync(`./data/${nameFolder}`)                    
-          let folders = dataFolder.filter(elem => elem.search(new RegExp("[.]")) == -1)          
-          for (let i = 0; i < folders.length; i++) {
-            total += await size(`./data/${nameFolder}/${folders[0]}`)
-          }           
-          app.get("sizeFolder")(`./data/${nameFolder}`,(err,size) => {
-            if(err) {
-              res.status(500).json({"Message":"Server Error"}).end()
-            }            
-            else {          
-              let doc = {
-                "created": {
-                  "date": generateDate(data.atime),
-                  "time": generateTime(data.atime)
-                },
-                "access": {
-                  "date": generateDate(data.birthtime),
-                  "time": generateTime(data.birthtime)
-                },
-                "modified": {
-                  "date": generateDate(data.mtime),
-                  "time": generateTime(data.mtime)
-                },
-                "size": size + total
-              }
-              res.status(200).json(doc).end()
+        app.get("sizeFolder")(`./data/${nameFolder}`, (err, size) => {
+          if (err) {
+            res.status(500).json({ "Message": "Server Error" }).end()
+          }
+          else {
+            let doc = {
+              "created": {
+                "date": generateDate(data.atime),
+                "time": generateTime(data.atime)
+              },
+              "access": {
+                "date": generateDate(data.birthtime),
+                "time": generateTime(data.birthtime)
+              },
+              "modified": {
+                "date": generateDate(data.mtime),
+                "time": generateTime(data.mtime)
+              },
+              "size": size + total
             }
-          })                   
-        }
-      })
-    }
-    else {
-      res.status(401).send("Unauthorized")
-    }
+            res.status(200).json(doc).end()
+          }
+        })
+      }
+    })
   }
 
   folder.edit = async (req, res) => {
+    let data = req.body
     let nameFolderCurrent = req.params.nameFolderCurrent
-    let auth = await authBearer(req.headers.authorization.slice(7), nameFolderCurrent)
-    if (auth == true) {
-      let data = req.body
-      let result = joi.validate(data, model)
-      if (result.error) {
-        res.status(400).json(result.error)
-      }
-      else {
-        let user = await all("SELECT id FROM users WHERE nick = ?", [data.nick])
-        if (user.length == 0) {
-          res.status(404).json({ "Message": "User not found" }).end()
-        }
-        else {
-          fs.rename("./data/" + nameFolderCurrent, "./data/" + data.nameFolder, async (err) => {
-            if (err) {
-              res.status(409).json({ "Message": "Folder already exists" })
-            }
-            else {
-              db.run("UPDATE folders SET nameFolder = ? WHERE idUser = ?", [data.nameFolder,user[0].id], (err,result) => {
-                let message = {
-                  "Message":"Folder rename successful",
-                  "urlFolder":`${process.env.protocol}://${req.headers.host}/${data.nameFolder}`
-                }
-                res.status(200).json(message)
-              })
-            }
-          })
-        }
-      }
+    let result = joi.validate(data, model)
+    if (result.error) {
+      res.status(400).json(result.error).end()
     }
     else {
-      res.status(401).send("Unauthorized")
+      let user = await all("SELECT id FROM users WHERE nick = ?", [data.nick])
+      if (user.length == 0) {
+        res.status(404).json({ "Message": "User not found" }).end()
+      }
+      else {
+        fs.rename("./data/" + nameFolderCurrent, "./data/" + data.nameFolder, async (err) => {
+          if (err) {
+            res.status(409).json({ "Message": "Folder already exists" }).end()
+          }
+          else {
+            db.run("UPDATE folders SET nameFolder = ? WHERE idUser = ?", [data.nameFolder, user[0].id], (err, result) => {
+              let message = {
+                "Message": "Folder rename successful",
+                "urlFolder": `${process.env.protocol}://${req.headers.host}/${data.nameFolder}`
+              }
+              res.status(200).json(message).end()
+            })
+          }
+        })
+      }
     }
   }
 
   folder.delete = async (req, res) => {
     let nameFolder = req.params.nameFolder
-    let auth = await authBearer(req.headers.authorization.slice(7),nameFolder)
-    if (auth == true) {
-      fs.rmdir("./data/" + nameFolder, async (err) => {
-        if (err) {
-          if (err.errno == -2) {
-            res.status(404).json({ "Message": "Folder not found" })
-          }
-          if (err.errno == -17 || err.errno == -39) {
-            res.status(409).json({ "Message": "Folder is not empty" })
-          }
+    fs.rmdir("./data/" + nameFolder, async (err) => {
+      if (err) {
+        if (err.errno == -2) {
+          res.status(404).json({ "Message": "Folder not found" })
         }
-        else {
-          try {
-            let idFolder = await all("SELECT id FROM folders WHERE nameFolder = ?", [nameFolder])
-            db.run("DELETE FROM folders WHERE id = ?", [idFolder[0].id],(err,result) => {
-              if (err) {
-                res.status(500).json({'Message':'Server Error'})
-              }
-              else {
-                res.status(200).json({ "Message": "Folder removed successful" })
-              }
-            })            
-          } catch (error) {
-            fs.mkdirSync(`./data/${nameFolder}`)
-            res.status(500).json({"Message":"Server Error"})
-          }
+        if (err.errno == -17 || err.errno == -39) {
+          res.status(409).json({ "Message": "Folder is not empty" })
         }
-      })
-    }
-    else {
-      res.status(401).send("Unauthorized")
-    }
-  }
-
-  async function authDigest(user, nameFolder) {
-    try {
-      let result = await all("SELECT id FROM users WHERE nick = ?", [user])
-      let folder = await all("SELECT nameFolder FROM folders WHERE idUser = ?", [result[0].id])
-      if (folder[0].nameFolder == nameFolder) {
-        return true
       }
       else {
-        return false
+        try {
+          let idFolder = await all("SELECT id FROM folders WHERE nameFolder = ?", [nameFolder])
+          db.run("DELETE FROM folders WHERE id = ?", [idFolder[0].id], (err, result) => {
+            if (err) {
+              res.status(500).json({ 'Message': 'Server Error' })
+            }
+            else {
+              res.status(200).json({ "Message": "Folder removed successful" })
+            }
+          })
+        } catch (error) {
+          fs.mkdirSync(`./data/${nameFolder}`)
+          res.status(500).json({ "Message": "Server Error" })
+        }
       }
-    } catch (error) {
-      return false
-    }
-  }
-
-  async function authBearer(token, nameFolder) {
-    try {
-      let result = await all("SELECT id FROM users WHERE token = ?", [token])
-      let folder = await all("SELECT nameFolder FROM folders WHERE idUser = ?", [result[0].id])
-      if (folder[0].nameFolder == nameFolder) {
-        return true
-      }
-      else {
-        return false
-      }
-    } catch (error) {
-      return false
-    }
+    })
   }
 
   function generateDate(time) {
@@ -280,7 +214,6 @@ module.exports = (app) => {
     let hour = new Date(time)
     return `${hour.getHours()}:${hour.getMinutes()}:${hour.getSeconds()}`
   }
-
 
   return folder
 }
