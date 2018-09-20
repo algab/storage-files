@@ -1,11 +1,11 @@
 module.exports = (app) => {
   var fs = app.get("fs")
+  var middleware = app.get("middleware")
 
-  app.get("/:nameFolder/:param", (req, res) => { 
+  app.get("/:nameFolder/:param", middleware.folder, (req, res) => {
     let nameFolder = req.params.nameFolder
     let param = req.params.param
-    let result = param.search(new RegExp("[.]"))
-    if (result == -1) {
+    if (res.locals.subfolder) {
       fs.readdir(`./data/${nameFolder}/${param}`, (err, data) => {
         if (err) {
           res.status(404).json({ "Message": "SubFolder not found" })
@@ -13,7 +13,7 @@ module.exports = (app) => {
         else {
           if (data.length > 0) {
             for (let i = 0; i < data.length; i++) {
-              data[i] = {"id":i,"name":data[i],"type":"object"}
+              data[i] = { "id": i, "name": data[i], "type": "object" }
             }
           }
           res.status(200).json(data)
@@ -26,7 +26,7 @@ module.exports = (app) => {
       object.on("error", (err) => {
         res.status(404).json({ "Message": "Object not found" })
       })
-      
+
       object.pipe(res)
     }
   })
@@ -37,12 +37,12 @@ module.exports = (app) => {
     let obj = req.params.object
 
     const object = fs.createReadStream(`./data/${nameFolder}/${nameSubFolder}/${obj}`)
-       
+
     object.on("error", (err) => {
       res.status(404).json({ "Message": "Object not found" })
     })
 
     object.pipe(res)
   })
-    
+
 }

@@ -37,9 +37,9 @@ middleware.app = async (req, res, next) => {
         } catch (error) {
             res.status(401).send('Unauthorized').end()
         }
-    }    
-    else {        
-        let nameFolder = req.body.nameFolder               
+    }
+    else {
+        let nameFolder = req.body.nameFolder
         try {
             let result = await all("SELECT id FROM users WHERE token = ?", [token])
             let folder = await all("SELECT nameFolder FROM folders WHERE idUser = ?", [result[0].id])
@@ -65,6 +65,36 @@ middleware.user = async (req, res, next) => {
         }
         else {
             res.status(401).send('Unauthorized').end()
+        }
+    } catch (error) {
+        res.status(401).send('Unauthorized').end()
+    }
+}
+
+middleware.folder = async (req, res, next) => {
+    try {
+        let nameFolder = req.params.nameFolder
+        let param = req.params.param         
+
+        if (param.search(new RegExp("[.]")) == -1) {
+            let token = req.headers.authorization.slice(7)
+            if (token) {
+                let result = await all("SELECT id FROM users WHERE token = ?", [token])
+                let folder = await all("SELECT nameFolder FROM folders WHERE idUser = ?", [result[0].id])
+                if (folder[0].nameFolder == nameFolder) {
+                    res.locals.subfolder = true
+                    next()
+                }
+                else {
+                    res.status(401).send('Unauthorized').end()
+                }                
+            }
+            else {
+                res.status(401).send('Unauthorized').end()
+            }
+        }
+        else {
+            next()
         }
     } catch (error) {
         res.status(401).send('Unauthorized').end()
