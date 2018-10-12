@@ -13,7 +13,7 @@ module.exports = (app) => {
         else {
           if (data.length > 0) {
             for (let i = 0; i < data.length; i++) {
-              data[i] = { "id": i, "name": data[i], "type": "object" }
+              data[i] = { "name": data[i], "type": "object" }
             }
           }
           res.status(200).json(data)

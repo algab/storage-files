@@ -5,12 +5,10 @@ module.exports = (app) => {
 
   var subfolder = {}
 
-  var version = "/v1"
-
   subfolder.create = (req, res) => {
     let data = req.body
     let result = joi.validate(data, model)
-    if (result.error != null) {
+    if (result.error) {
       res.status(400).json(result.error)
     }
     else {
@@ -42,29 +40,23 @@ module.exports = (app) => {
         res.status(404).json({ "Message": "Verify that the Folder name and SubFolder is correct" })
       }
       else {
-        app.get("sizeFolder")(`./data/${nameFolder}/${nameSubFolder}`, (err, size) => {
-          if (err) {
-            res.status(500).json({ "Message": "Server Error" }).end()
-          }
-          else {
-            let doc = {
-              "created": {
-                "date": generateDate(data.atime),
-                "time": generateTime(data.atime)
-              },
-              "access": {
-                "date": generateDate(data.birthtime),
-                "time": generateTime(data.birthtime)
-              },
-              "modified": {
-                "date": generateDate(data.mtime),
-                "time": generateTime(data.mtime)
-              },
-              "size": size
-            }
-            res.status(200).json(doc)
-          }
-        })
+        let size = sizeSubFolder(nameFolder,nameSubFolder)
+        let doc = {
+          "created": {
+            "date": generateDate(data.atime),
+            "time": generateTime(data.atime)
+          },
+          "access": {
+            "date": generateDate(data.birthtime),
+            "time": generateTime(data.birthtime)
+          },
+          "modified": {
+            "date": generateDate(data.mtime),
+            "time": generateTime(data.mtime)
+          },
+          "size": app.get("pretty")(size)
+        }
+        res.status(200).json(doc)
       }
     })
   }
@@ -117,12 +109,21 @@ module.exports = (app) => {
 
   function generateDate(time) {
     let date = new Date(time)
-    return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
   }
 
   function generateTime(time) {
     let hour = new Date(time)
     return `${hour.getHours()}:${hour.getMinutes()}:${hour.getSeconds()}`
+  }
+
+  function sizeSubFolder(nameFolder,nameSubFolder) {
+    let size = 0
+    let data = fs.readdirSync(`./data/${nameFolder}/${nameSubFolder}`)
+    for (let i = 0; i < data.length; i++) {
+      size += fs.statSync(`./data/${nameFolder}/${nameSubFolder}/${data[i]}`).size
+    }
+    return size  
   }
 
   return subfolder

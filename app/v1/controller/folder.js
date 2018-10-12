@@ -1,17 +1,12 @@
 module.exports = (app) => {
   var model = app.model.folder
   var joi = app.get("joi")
-  var util = app.get("util")
   var fs = app.get("fs")
   var db = app.get("database")
 
   var folder = {}
 
-  var version = "/v1"
-
-  var all = util.promisify(db.all).bind(db)
-
-  var size = util.promisify(app.get("sizeFolder"))
+  var all = app.get("util").promisify(db.all).bind(db)
 
   folder.create = async (req, res) => {
     let data = req.body
@@ -53,7 +48,7 @@ module.exports = (app) => {
     }
   }
 
-  folder.list = async (req, res) => {
+  folder.list = (req, res) => {
     let nameFolder = req.params.nameFolder
     let type = req.query.type
     fs.readdir("./data/" + nameFolder, (err, data) => {
@@ -64,19 +59,19 @@ module.exports = (app) => {
         if (data.length > 0) {
           if (type) {
             if (type == "folder") {
-              folder = []
+              let folder = []
               for (let i = 0; i < data.length; i++) {
                 if (data[i].search(new RegExp("[.]")) == -1) {
-                  folder.push({ "id": i, "name": data[i], "type": "folder" })
+                  folder.push({ "name": data[i], "type": "folder" })
                 }
               }
               res.status(200).json(folder).end()
             }
             else if (type == "object") {
-              object = []
+              let object = []
               for (let i = 0; i < data.length; i++) {
                 if (data[i].search(new RegExp("[.]")) != -1) {
-                  object.push({ "id": i, "name": data[i], "type": "object" })
+                  object.push({ "name": data[i], "type": "object" })
                 }
               }
               res.status(200).json(object).end()
@@ -88,10 +83,10 @@ module.exports = (app) => {
           else {
             for (let i = 0; i < data.length; i++) {
               if (data[i].search(new RegExp("[.]")) == -1) {
-                data[i] = { "id": i, "name": data[i], "type": "folder" }
+                data[i] = { "name": data[i], "type": "folder" }
               }
               else {
-                data[i] = { "id": i, "name": data[i], "type": "object" }
+                data[i] = { "name": data[i], "type": "object" }
               }
             }
             res.status(200).json(data).end()
@@ -104,42 +99,30 @@ module.exports = (app) => {
     })
   }
 
-  folder.stats = async (req, res) => {
+  folder.stats = (req, res) => {
     let nameFolder = req.params.nameFolder
-    fs.stat("./data/" + nameFolder, async (err, data) => {
+    fs.stat("./data/" + nameFolder,(err, data) => {
       if (err) {
         res.status(404).json({ "Message": "Folder not found" }).end()
       }
       else {        
-        let total = 0
-        let dataFolder = fs.readdirSync(`./data/${nameFolder}`)
-        let folders = dataFolder.filter(elem => elem.search(new RegExp("[.]")) == -1)
-        for (let i = 0; i < folders.length; i++) {
-          total += await size(`./data/${nameFolder}/${folders[0]}`)
+        let size = sizeFolder(nameFolder)
+        let doc = {
+          "created": {
+            "date": generateDate(data.birthtime),
+            "time": generateTime(data.birthtime)
+          },
+          "access": {
+            "date": generateDate(data.atime),
+            "time": generateTime(data.atime)
+          },
+          "modified": {
+            "date": generateDate(data.mtime),
+            "time": generateTime(data.mtime)
+          },
+          "size": app.get("pretty")(size)
         }
-        app.get("sizeFolder")(`./data/${nameFolder}`, (err, size) => {
-          if (err) {
-            res.status(500).json({ "Message": "Server Error" }).end()
-          }
-          else {
-            let doc = {
-              "created": {
-                "date": generateDate(data.atime),
-                "time": generateTime(data.atime)
-              },
-              "access": {
-                "date": generateDate(data.birthtime),
-                "time": generateTime(data.birthtime)
-              },
-              "modified": {
-                "date": generateDate(data.mtime),
-                "time": generateTime(data.mtime)
-              },
-              "size": size + total
-            }
-            res.status(200).json(doc).end()
-          }
-        })
+        res.status(200).json(doc).end()
       }
     })
   }
@@ -207,12 +190,35 @@ module.exports = (app) => {
 
   function generateDate(time) {
     let date = new Date(time)
-    return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
   }
 
   function generateTime(time) {
     let hour = new Date(time)
     return `${hour.getHours()}:${hour.getMinutes()}:${hour.getSeconds()}`
+  }
+
+  function sizeFolder(name) {
+    let size = 0
+    let data = fs.readdirSync(`./data/${name}`)
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].search(new RegExp("[.]")) == -1) {        
+        size += sizeSubFolder(name,data[i])      
+      }
+      else {
+        size += fs.statSync(`./data/${name}/${data[i]}`).size
+      }
+    }    
+    return size    
+  }
+
+  function sizeSubFolder(nameFolder,nameSubFolder) {
+    let size = 0
+    let data = fs.readdirSync(`./data/${nameFolder}/${nameSubFolder}`)
+    for (let i = 0; i < data.length; i++) {
+      size += fs.statSync(`./data/${nameFolder}/${nameSubFolder}/${data[i]}`).size
+    }
+    return size  
   }
 
   return folder

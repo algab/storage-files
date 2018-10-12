@@ -2,10 +2,8 @@ module.exports = (app) => {
   var fs = app.get("fs")
   var fsExtra = app.get("fs-extra")
   var formidable = app.get("formidable")
-  
-  var object = {}
 
-  var version = "/v1"
+  var object = {}
 
   object.saveFolder = (req, res) => {
     let nameFolder = req.params.nameFolder
@@ -29,12 +27,15 @@ module.exports = (app) => {
         form.on('file', (name, file) => {
           let object = file.name
           let obj = fs.existsSync(`./data/${nameFolder}/${object}`)
+
           if (obj == true) {
             let objects = fs.readdirSync(`./data/${nameFolder}`)
             object = nameObject(objects, object)
           }
+
           let oldpath = file.path
           let newpath = `./data/${nameFolder}/${object}`
+
           fsExtra.move(oldpath, newpath, (err) => {
             if (err) {
               if (err.errno == -17) {
@@ -69,6 +70,7 @@ module.exports = (app) => {
     else {
       let folder = fs.existsSync("./data/" + nameFolder)
       let subFolder = fs.existsSync("./data/" + nameFolder + "/" + nameSubFolder)
+
       if (folder == false) {
         res.status(404).json({ "Message": "Folder not found" })
       }
@@ -90,12 +92,15 @@ module.exports = (app) => {
         form.on('file', (name, file) => {
           let object = file.name
           let obj = fs.existsSync(`./data/${nameFolder}/${nameSubFolder}/${object}`)
+
           if (obj == true) {
             let objects = fs.readdirSync(`./data/${nameFolder}/${nameSubFolder}`)
             object = nameObject(objects, object)
           }
+
           let oldpath = file.path
           let newpath = `./data/${nameFolder}/${nameSubFolder}/${object}`
+
           fsExtra.move(oldpath, newpath, (err) => {
             if (err) {
               if (err.errno == -17) {
@@ -121,12 +126,23 @@ module.exports = (app) => {
   object.listFolder = (req, res) => {
     let nameFolder = req.params.nameFolder
     let nameObject = req.params.nameObject
-    fs.stat("./data/" + nameFolder + "/" + nameObject, (err, stats) => {
+    fs.stat("./data/" + nameFolder + "/" + nameObject, (err, data) => {
       if (err) {
         res.status(404).json({ "Message": "Make sure the Folder name and object is correct and try again" })
       }
       else {
-        res.status(200).json(stats)
+        let doc = {
+          "created": {
+            "date": generateDate(data.atime),
+            "time": generateTime(data.atime)
+          },
+          "access": {
+            "date": generateDate(data.birthtime),
+            "time": generateTime(data.birthtime)
+          },
+          "size": app.get("pretty")(data.size)
+        }
+        res.status(200).json(doc)
       }
     })
   }
@@ -140,7 +156,18 @@ module.exports = (app) => {
         res.status(404).json({ "Message": "Make sure the Folder name, SubFolder and Object is correct and try again" })
       }
       else {
-        res.status(200).json(stats)
+        let doc = {
+          "created": {
+            "date": generateDate(data.atime),
+            "time": generateTime(data.atime)
+          },
+          "access": {
+            "date": generateDate(data.birthtime),
+            "time": generateTime(data.birthtime)
+          },
+          "size": app.get("pretty")(data.size)
+        }
+        res.status(200).json(doc)
       }
     })
   }
@@ -172,16 +199,47 @@ module.exports = (app) => {
     })
   }
 
-  function nameObject(objects, object) {
-    let split = object.split(".")
+  function nameObject(data, object) {
     let total = 0
-    for (let i = 0; i < objects.length; i++) {
-      let pos = objects[i].search(`${split[0]}-`)
-      if (pos > -1) {
-        total++
+    let split = object.split(".")   
+    if (split.length == 2) {
+      for (let i = 0; i < data.length; i++) {
+        let hasObject = data[i].search(`${split[0]}-`)
+        if (hasObject > -1) {
+          total++
+        }
       }
+      return `${split[0]}-${total + 1}.${split[1]}`
     }
-    return `${split[0]}-${total + 1}.${split[1]}`
+    else {
+      let newSplit = object.split(".")
+      let type = newSplit[newSplit.length - 1]
+
+      newSplit.pop()
+      newSplit = newSplit.join(".")
+
+      let split = []
+      split.push(newSplit)
+      split.push(type)    
+
+      for (let i = 0; i < data.length; i++) {
+        let hasObject = data[i].search(`${split[0]}-`)
+        if (hasObject > -1) {
+          total++
+        }
+      }
+      return `${split[0]}-${total + 1}.${split[1]}`
+    }
+  }
+
+  function generateDate(time) {
+    let date = new Date(time)
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+  }
+
+  function generateTime(time) {
+    let hour = new Date(time)
+    return `${hour.getHours()}:${hour.getMinutes()}:${hour.getSeconds()}`
   }
 
   return object
