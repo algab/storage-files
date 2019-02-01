@@ -1,4 +1,3 @@
-const auth = require("./auth")
 const db = require("./database")
 const util = require("util")
 

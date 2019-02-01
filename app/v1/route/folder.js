@@ -5,10 +5,10 @@ module.exports = (app) => {
 
   var version = "/v1"
 
-  app.get("/:nameFolder",auth.authenticate('bearer',{session:false}),middleware.app,folder.list)
+  app.get("/:nameFolder", auth.authenticate('bearer',{session:false}), middleware.app,folder.list)
   
-  app.post(version + "/folders",auth.authenticate('bearer',{session:false}),folder.create)
-  app.get(version + "/folders/:nameFolder",auth.authenticate('bearer',{session:false}),middleware.app,folder.stats)
-  app.put(version + "/folders/:nameFolderCurrent",auth.authenticate('bearer',{session:false}),middleware.app,folder.edit)
-  app.delete(version + "/folders/:nameFolder",auth.authenticate('bearer',{session:false}),middleware.app,folder.delete)
+  app.post(version + "/folders", auth.authenticate('bearer',{session:false}),folder.create)
+  app.get(version + "/folders/:nameFolder", auth.authenticate('bearer',{session:false}),middleware.app,folder.stats)
+  app.put(version + "/folders/:nameFolderCurrent", auth.authenticate('bearer',{session:false}),middleware.app,folder.edit)
+  app.delete(version + "/folders/:nameFolder", auth.authenticate('bearer',{session:false}),middleware.app,folder.delete)
 }

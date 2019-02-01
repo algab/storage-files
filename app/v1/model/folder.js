@@ -1,7 +1,9 @@
-module.exports = (app) => {
-    var joi = app.get("joi")
+const joi = require("joi")
 
-    const folder = {
+module.exports = (app) => {
+    let folder = {}
+
+    folder = {
         nameFolder: joi.string().regex(/^[a-z,0-9]+$/).required(),
         nick: joi.string().regex(/^[a-z,0-9]+$/).required()
     }

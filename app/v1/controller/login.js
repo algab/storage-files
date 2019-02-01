@@ -5,8 +5,8 @@ module.exports = (app) => {
 
     login.user = (req, res) => {
         let data = req.body
-        if (data.nick && data.password) {
-            db.all("SELECT * FROM users WHERE nick = ? and password = ?", [data.nick, data.password], (err, result) => {
+        if (data.email && data.password) {
+            db.all("SELECT * FROM users WHERE email = ? and password = ?", [data.email, data.password], (err, result) => {
                 if (err) {
                     res.status(500).json(err).end()
                 }
@@ -21,7 +21,7 @@ module.exports = (app) => {
             })
         }
         else {
-            res.status(400).json({ "Message": "Nick and password required" }).end()
+            res.status(400).json({ "Message": "Email and password required" }).end()
         }
     }
 

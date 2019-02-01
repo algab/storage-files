@@ -1,7 +1,9 @@
+const joi = require("joi")
+const fs = require("fs")
+const pretty = require("prettysize")
+
 module.exports = (app) => {
   var model = app.model.subfolder
-  var joi = app.get("joi")
-  var fs = app.get("fs")
 
   var subfolder = {}
 
@@ -54,7 +56,7 @@ module.exports = (app) => {
             "date": generateDate(data.mtime),
             "time": generateTime(data.mtime)
           },
-          "size": app.get("pretty")(size)
+          "size": pretty(size)
         }
         res.status(200).json(doc)
       }

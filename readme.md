@@ -12,4 +12,4 @@ O Diretório principal onde os arquivos serão armazenados. Pasta pode conter um
 
 ### OBJETO
 
-São arquivos binários que estão armazenados dentro de uma pasta ou subpasta. Qualquer arquvio binário pode ser armazenado, como videos, áudio e imagens.
+São arquivos binários que estão armazenados dentro de uma pasta ou subpasta. Qualquer arquivo binário pode ser armazenado, como videos, áudio e imagens.

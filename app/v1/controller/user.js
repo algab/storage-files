@@ -1,7 +1,8 @@
+const joi = require("joi")
+const util = require("util")
+
 module.exports = (app) => {
   var model = app.model.user
-  var joi = app.get("joi")
-  var util = app.get("util")
   var db = app.get("database")
 
   var user = {}
@@ -26,8 +27,9 @@ module.exports = (app) => {
             res.status(409).json({ "Message": "Nick already exists" })
           }
           else {
+            let date = `${new Date().getDay()}/${new Date().getMonth() + 1}/${new Date().getFullYear()} - ${new Date().getHours}:${new Date().getMinutes()}:${new Date().getSeconds()}`
             let token = app.get("hasha")(`${data.nick}/${data.password}/${new Date().getTime()}`, { 'algorithm': 'md5' })
-            db.run("INSERT INTO users (name,nick,email,password,token,date) VALUES (?,?,?,?,?,?)", [data.name, data.nick, data.email, data.password, token, new Date()], async (err, result) => {
+            db.run("INSERT INTO users (name,state,city,nick,email,password,token,date) VALUES (?,?,?,?,?,?,?,?)", [data.name, data.state, data.city, data.nick, data.email, data.password, token, date], async (err, result) => {
               if (err) {
                 res.status(500).json({ "Message": "Server Error" }).end()
               }
@@ -79,7 +81,7 @@ module.exports = (app) => {
       if (err) {
         res.status(500).json({ "Message": "Server Error" }).end()
       }
-      else {        
+      else {
         if (result.length == 0) {
           res.status(404).json({ "Message": "Folder not found" }).end()
         }
@@ -100,9 +102,9 @@ module.exports = (app) => {
     else {
       try {
         let user = await all("SELECT email,nick FROM users WHERE id = ?", [id])
-        if (data.email ==  user[0].email) {
+        if (data.email == user[0].email) {
           if (data.nick == user[0].nick) {
-            db.run("UPDATE users SET name = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.nick, data.email, data.password, id], (err, result) => {
+            db.run("UPDATE users SET name = ?, state = ?, city = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.state, data.city, data.nick, data.email, data.password, id], (err, result) => {
               if (err) {
                 res.status(500).json({ "Message": "Server Error" }).end()
               }
@@ -114,14 +116,14 @@ module.exports = (app) => {
           else {
             let nick = await all("SELECT nick FROM users WHERE nick = ?", [data.nick])
             if (nick.length == 0) {
-              db.run("UPDATE users SET name = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.nick, data.email, data.password, id], (err, result) => {
+              db.run("UPDATE users SET name = ?, state = ?, city = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.state, data.city, data.nick, data.email, data.password, id], (err, result) => {
                 if (err) {
                   res.status(500).json({ "Message": "Server Error" }).end()
                 }
                 else {
                   res.status(200).json({ "Message": "User updated successful" }).end()
                 }
-              })                
+              })
             }
             else {
               res.status(409).json({ "Message": "Nick already exists" }).end()
@@ -130,9 +132,9 @@ module.exports = (app) => {
         }
         else {
           let email = await all("SELECT email FROM users WHERE email = ?", [data.email])
-          if (email.length == 0) {           
+          if (email.length == 0) {
             if (data.nick == user[0].nick) {
-              db.run("UPDATE users SET name = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.nick, data.email, data.password, id], (err, result) => {
+              db.run("UPDATE users SET name = ?, state = ?, city = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.state, data.city, data.nick, data.email, data.password, id], (err, result) => {
                 if (err) {
                   res.status(500).json({ "Message": "Server Error" }).end()
                 }
@@ -144,27 +146,46 @@ module.exports = (app) => {
             else {
               let nick = await all("SELECT nick FROM users WHERE nick = ?", [data.nick])
               if (nick.length == 0) {
-                db.run("UPDATE users SET name = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.nick, data.email, data.password, id], (err, result) => {
+                db.run("UPDATE users SET name = ?, state = ?, city = ?, nick = ?, email = ?, password = ? WHERE id = ?", [data.name, data.state, data.city, data.nick, data.email, data.password, id], (err, result) => {
                   if (err) {
                     res.status(500).json({ "Message": "Server Error" }).end()
                   }
                   else {
                     res.status(200).json({ "Message": "User updated successful" }).end()
                   }
-                })                
+                })
               }
               else {
                 res.status(409).json({ "Message": "Nick already exists" }).end()
               }
-            }            
+            }
           }
           else {
             res.status(409).json({ "Message": "Email already exists" }).end()
-          }          
+          }
         }
       } catch (error) {
         res.status(500).json({ "Message": "Server Error" }).end()
       }
+    }
+  }
+
+  user.password = (req, res) => {
+    let id = req.params.id
+    let data = req.body
+    if (data.password) {
+      db.run("UPDATE users SET password = ? WHERE id = ?", [data.password, id], (err, result) => {
+        if (err) {
+          console.log(err);          
+          res.status(500).json({ "Message": "Server Error" }).end()
+        }
+        else {
+          res.status(200).json({ "Message": "Password change successful" }).end()
+        }
+      })
+    }
+    else {
+      res.status(400).json({ "Message": "Password is required" }).end()
     }
   }
 

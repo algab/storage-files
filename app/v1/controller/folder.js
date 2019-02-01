@@ -1,12 +1,15 @@
+const joi = require("joi")
+const fs = require("fs")
+const util = require("util")
+const pretty = require("prettysize")
+
 module.exports = (app) => {
   var model = app.model.folder
-  var joi = app.get("joi")
-  var fs = app.get("fs")
   var db = app.get("database")
 
   var folder = {}
 
-  var all = app.get("util").promisify(db.all).bind(db)
+  var all = util.promisify(db.all).bind(db)
 
   folder.create = async (req, res) => {
     let data = req.body
@@ -105,7 +108,7 @@ module.exports = (app) => {
       if (err) {
         res.status(404).json({ "Message": "Folder not found" }).end()
       }
-      else {        
+      else {                      
         let size = sizeFolder(nameFolder)
         let doc = {
           "created": {
@@ -120,7 +123,7 @@ module.exports = (app) => {
             "date": generateDate(data.mtime),
             "time": generateTime(data.mtime)
           },
-          "size": app.get("pretty")(size)
+          "size": pretty(size)
         }
         res.status(200).json(doc).end()
       }

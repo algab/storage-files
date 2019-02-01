@@ -1,8 +1,9 @@
-module.exports = (app) => {
-  var fs = app.get("fs")
-  var fsExtra = app.get("fs-extra")
-  var formidable = app.get("formidable")
+const fs = require("fs")
+const fsExtra = require("fs-extra")
+const formidable = require("formidable")
+const pretty = require("prettysize")
 
+module.exports = (app) => {
   var object = {}
 
   object.saveFolder = (req, res) => {
@@ -140,7 +141,7 @@ module.exports = (app) => {
             "date": generateDate(data.birthtime),
             "time": generateTime(data.birthtime)
           },
-          "size": app.get("pretty")(data.size)
+          "size": pretty(data.size)
         }
         res.status(200).json(doc)
       }
@@ -151,7 +152,7 @@ module.exports = (app) => {
     let nameFolder = req.params.nameFolder
     let nameSubFolder = req.params.nameSubFolder
     let nameObject = req.params.nameObject
-    fs.stat("./data/" + nameFolder + "/" + nameSubFolder + "/" + nameObject, (err, stats) => {
+    fs.stat("./data/" + nameFolder + "/" + nameSubFolder + "/" + nameObject, (err, data) => {
       if (err) {
         res.status(404).json({ "Message": "Make sure the Folder name, SubFolder and Object is correct and try again" })
       }
@@ -165,7 +166,7 @@ module.exports = (app) => {
             "date": generateDate(data.birthtime),
             "time": generateTime(data.birthtime)
           },
-          "size": app.get("pretty")(data.size)
+          "size": pretty(data.size)
         }
         res.status(200).json(doc)
       }

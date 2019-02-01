@@ -1,5 +1,6 @@
+const fs = require("fs")
+
 module.exports = (app) => {
-  var fs = app.get("fs")
   var middleware = app.get("middleware")
 
   app.get("/:nameFolder/:param", middleware.folder, (req, res) => {

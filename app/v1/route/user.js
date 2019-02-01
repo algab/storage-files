@@ -10,5 +10,6 @@ module.exports = (app) => {
   app.get(version + "/users/:id",auth.authenticate('bearer',{session:false}),middleware.user,user.search)
   app.get(version + "/users/:id/folders",auth.authenticate('bearer',{session:false}),middleware.user,user.folder)
   app.put(version + "/users/:id",auth.authenticate('bearer',{session:false}),middleware.user,user.edit)
+  app.put(version + "/users/:id/password",auth.authenticate('bearer',{session:false}),middleware.user,user.password)
   app.delete(version + "/users/:id",auth.authenticate('bearer',{session:false}),middleware.user,user.delete)
 }
