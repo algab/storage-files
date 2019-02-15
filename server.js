@@ -1,4 +1,4 @@
-require("dotenv").load()
+require("dotenv").config({path: './application.env'})
 
 const app = require("./config/express")
 

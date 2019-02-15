@@ -17,7 +17,7 @@ app.set("database",database)
 app.set("middleware",middleware)
 app.set("hasha",hasha)
 app.set("io",io)
-app.set("port",3001)
+app.set("port", process.env.port || 3001)
 
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
