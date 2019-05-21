@@ -1,7 +1,9 @@
+"use strict";
+
+require("dotenv").config();
+
 const express = require("express")
 const consign = require("consign")
-const cors = require("cors")
-const hasha = require("hasha")
 const server = require("socket.io")
 const auth = require("./auth")
 const database = require("./database")
@@ -9,23 +11,21 @@ const middleware = require("./middleware")
 
 var app = express()
 
-var io = new server(3002)
+var io = new server(process.env.SOCKET_PORT)
 io.set('origins', '*:*')
 
-app.set("auth",auth)
-app.set("database",database)
-app.set("middleware",middleware)
-app.set("hasha",hasha)
-app.set("io",io)
-app.set("port", process.env.port || 3001)
+app.set("port", process.env.API_PORT || 3001);
+app.set("version", "/v1");
+app.set("auth", auth);
+app.set("database", database);
+app.set("middleware", middleware);
+app.set("io", io);
 
-app.use(express.urlencoded({extended:true}))
-app.use(express.json())
-app.use(auth.initialize())
-app.use(cors())
+app.use(express.json());
+app.use(auth.initialize());
+app.use(require("cors")());
+app.use(require("helmet")());
 
-app.disable("x-powered-by")
+consign({ "cwd": "app", "verbose": false }).include("models").then("controllers").then("routes").then(".").into(app);
 
-consign({"cwd":"app/v1","verbose":true}).include("model").then("controller").then("route").then(".").into(app)
-
-module.exports = app
+module.exports = app;

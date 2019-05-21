@@ -1,15 +1,15 @@
-require("dotenv").config({path: './application.env'})
+"use strict";
 
-const app = require("./config/express")
+const app = require("./config/express");
 
-if (process.env.protocol == "https") {
+if (process.env.PROTOCOL == "https") {
     const https = require("https")
     const fs = require("fs")
 
     const options = {
-        key: fs.readFileSync(process.env.key,'utf-8'),
-        cert: fs.readFileSync(process.env.cert,'utf-8'),
-        ca: fs.readFileSync(process.env.ca,'utf-8')
+        key: fs.readFileSync(process.env.KEY,'utf-8'),
+        cert: fs.readFileSync(process.env.CERT,'utf-8'),
+        ca: fs.readFileSync(process.env.CA,'utf-8')
     }
 
     https.createServer(options,app).listen(app.get("port"),() => {

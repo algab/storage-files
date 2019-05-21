@@ -1,5 +1,11 @@
-var sqlite = require("sqlite3")
+"use strict";
 
-const db = new sqlite.Database("./data/storage.db")
+const sqlite = require("sqlite3");
+const util = require("util");
 
-module.exports = db
+const db = new sqlite.Database("./data/storage.db");
+
+const all = util.promisify(db.all).bind(db);
+const run = util.promisify(db.run).bind(db);
+
+module.exports = { all, run };

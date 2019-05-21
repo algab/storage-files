@@ -1,5 +1,5 @@
 module.exports = (app) => {
-   var object = app.controller.object
+   var object = app.controllers.object
    var auth = app.get("auth")
    var middleware = app.get("middleware")
 
