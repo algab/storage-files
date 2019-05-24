@@ -10,9 +10,6 @@ class Folder {
         this.stats = this.stats.bind(this);
         this.edit = this.edit.bind(this);
         this.delete = this.delete.bind(this);
-        this.sizeFolder = this.sizeFolder.bind(this);
-        this.generateDate = this.generateDate.bind(this);
-        this.generateTime = this.generateTime.bind(this);
     }
 
     async save(req, res) {

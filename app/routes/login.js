@@ -1,6 +1,7 @@
-module.exports = (app) => {
-    var login = app.controllers.login
-    var version = "/v1"
+"use strict";
 
-    app.put(version + "/login", login.user)
+module.exports = app => {
+    const login = app.controllers.login;
+
+    app.post(`${app.get("version")}/login`, login.login);
 }

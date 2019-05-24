@@ -1,6 +1,6 @@
 # STORAGE FILES
 
-API DE CONTROLE E ARMAZENAMENTO DE ARQUIVOS
+API for files storage and control.
 
 ### PASTA
 

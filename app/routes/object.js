@@ -1,14 +1,11 @@
-module.exports = (app) => {
-   var object = app.controllers.object
-   var auth = app.get("auth")
-   var middleware = app.get("middleware")
+"use strict";
 
-   var version = "/v1"
+const auth = require("../middlewares/auth");
 
-   app.post(version + "/folders/:nameFolder/object",auth.authenticate('bearer',{session:false}),middleware.app,object.saveFolder)
-   app.post(version + "/folders/:nameFolder/subfolders/:nameSubFolder/object",auth.authenticate('bearer',{session:false}),middleware.app,object.saveSubFolder)
-   app.get(version + "/folders/:nameFolder/object/:nameObject",auth.authenticate('bearer',{session:false}),middleware.app,object.listFolder)
-   app.get(version + "/folders/:nameFolder/subfolders/:nameSubFolder/object/:nameObject",auth.authenticate('bearer',{session:false}),middleware.app,object.listSubFolder)
-   app.delete(version + "/folders/:nameFolder/object/:nameObject",auth.authenticate('bearer',{session:false}),middleware.app,object.deleteFolder)
-   app.delete(version + "/folders/:nameFolder/subfolders/:nameSubFolder/object/:nameObject",auth.authenticate('bearer',{session:false}),middleware.app,object.deleteSubFolder)   
+module.exports = app => {
+    const object = app.controllers.object;
+
+    app.post(`${app.get("version")}/objects/upload`, auth.object, object.upload);
+    app.get(`${app.get("version")}/objects/:name`, auth.object, object.stats);
+    app.delete(`${app.get("version")}/objects/:name`, auth.object, object.delete);
 }

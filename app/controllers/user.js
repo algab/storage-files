@@ -1,6 +1,7 @@
 "use strict";
 
 const hasha = require("hasha");
+const crypto = require("crypto-js");
 const moment = require("moment-timezone");
 
 class User {
@@ -11,13 +12,14 @@ class User {
         this.search = this.search.bind(this);
         this.edit = this.edit.bind(this);
         this.password = this.password.bind(this);
+        this.token = this.token.bind(this);
         this.delete = this.delete.bind(this);
     }
 
     async save(req, res) {
         try {
             let data = req.body;
-            let email = await this.db.all("SELECT * FROM users WHERE email = ?", [data.email]);            
+            let email = await this.db.all("SELECT * FROM users WHERE email = ?", [data.email]);
             if (email.length != 0) {
                 res.status(409).json({ "Message": "Email already exists" }).end();
             }
@@ -30,8 +32,7 @@ class User {
                     if (data.password) {
                         data.password = hasha(data.password, { 'algorithm': 'md5' });
                         data.date = moment().tz('America/Fortaleza').format();
-                        data.token = hasha(`${data.nick}/${data.password}/${new Date().getTime()}`, { 'algorithm': 'md5' });
-                        await this.db.run("INSERT INTO users (nick,name,country,state,city,email,password,token,date) VALUES (?,?,?,?,?,?,?,?,?)", [data.nick, data.name, data.country, data.state, data.city, data.email, data.password, data.token, data.date]);
+                        await this.db.run("INSERT INTO users (nick,name,country,state,city,email,password,date) VALUES (?,?,?,?,?,?,?,?)", [data.nick, data.name, data.country, data.state, data.city, data.email, data.password, data.date]);
                         res.status(201).json(data).end();
                     }
                     else {
@@ -39,7 +40,7 @@ class User {
                     }
                 }
             }
-        } catch (error) {          
+        } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
         }
     }
@@ -47,6 +48,10 @@ class User {
     async list(req, res) {
         try {
             let users = await this.db.all("SELECT * FROM users");
+            users = users.map(data => {
+                delete data.password;
+                return data;
+            });
             res.status(200).json(users).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
@@ -57,6 +62,9 @@ class User {
         try {
             let nick = req.params.nick;
             let user = await this.db.all("SELECT * FROM users WHERE nick = ?", [nick]);
+            if (user[0]) {
+                delete user[0].password;
+            }
             res.status(200).json(user[0]).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
@@ -101,6 +109,16 @@ class User {
             else {
                 res.status(400).json({ "Message": "Password is required" }).end()
             }
+        } catch (error) {
+            res.status(500).json({ "Message": "Server Error" }).end();
+        }
+    }
+
+    async token(req, res) {
+        try {
+            let nick = req.params.nick;
+            const encrypt = crypto.AES.encrypt(JSON.stringify({ nick, type: "app" }), process.env.TOKEN_SECRET);
+            res.status(200).json({ "token": `Bearer ${encrypt.toString()}` }).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
         }
