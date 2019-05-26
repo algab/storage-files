@@ -1,14 +1,17 @@
 "use strict";
 
+const router = require('express').Router();
+const model = require("../models/folder");
 const validate = require("../middlewares/validate");
 const auth = require("../middlewares/auth");
 
 module.exports = app => {
-    const folder = app.controllers.folder;
-    const model = app.models.folder;
+    const folder = require("../controllers/folder")(app);
 
-    app.post(`${app.get("version")}/folders`, auth.folder, validate(model), folder.save);
-    app.get(`${app.get("version")}/folders/:name`, auth.folder, folder.stats);
-    app.put(`${app.get("version")}/folders/:name`, auth.folder, validate(model), folder.edit);
-    app.delete(`${app.get("version")}/folders/:name`, auth.folder, folder.delete);
+    router.post(`/`, auth.folder, validate(model), folder.save);
+    router.get(`/:name`, auth.folder, folder.stats);
+    router.put(`/:name`, auth.folder, validate(model), folder.edit);
+    router.delete(`/:name`, auth.folder, folder.delete);
+
+    return router;
 }

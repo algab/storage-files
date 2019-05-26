@@ -1,7 +1,12 @@
 "use strict";
 
-module.exports = app => {
-    const login = app.controllers.login;
+const router = require('express').Router();
 
-    app.post(`${app.get("version")}/login`, login.login);
+module.exports = app => {
+    const login = require("../controllers/login")(app);
+
+    router.post(`/`, login.login);
+    router.put(`/password`, login.password);
+
+    return router;
 }

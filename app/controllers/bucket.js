@@ -8,7 +8,6 @@ class Bucket {
     constructor(app) {
         this.db = app.get("database");
         this.save = this.save.bind(this);
-        this.list = this.list.bind(this);
         this.stats = this.stats.bind(this);
         this.edit = this.edit.bind(this);
         this.delete = this.delete.bind(this);
@@ -27,7 +26,7 @@ class Bucket {
                         else {
                             const date = moment().tz('America/Fortaleza').format();
                             await this.db.run("INSERT INTO buckets (name,date,owner) VALUES (?,?,?)", [req.body.name, date, req.body.nick]);
-                            res.status(201).json({ "urlBucket": `${process.env.PROTOCOL}://${req.headers.host}/${req.body.name}`, "date": date }).end();
+                            res.status(201).json({ "urlBucket": `${process.env.HOST}/${req.body.name}`, "date": date }).end();
                         }
                     });
                 }
@@ -42,56 +41,7 @@ class Bucket {
             res.status(500).json({ "Message": "Server Error" }).end();
         }
     }
-
-    async list(req, res) {
-        try {
-            let name = req.params.name;
-            let type = req.query.type;
-            let data = await fs.readdirSync(`./data/${name}`);
-            if (data) {
-                if (type) {
-                    if (type === "folder") {
-                        let folders = []
-                        for (let i = 0; i < data.length; i++) {
-                            if (data[i].search(new RegExp("[.]")) == -1) {
-                                folders.push({ "name": data[i], "type": "folder" });
-                            }
-                        }
-                        res.status(200).json(folders).end();
-                    }
-                    else if (type === "object") {
-                        let objects = [];
-                        for (let i = 0; i < data.length; i++) {
-                            if (data[i].search(new RegExp("[.]")) != -1) {
-                                objects.push({ "name": data[i], "type": "object" });
-                            }
-                        }
-                        res.status(200).json(objects).end();
-                    }
-                    else {
-                        res.status(200).json([]).end();
-                    }
-                }
-                else {
-                    data = data.map(data => {
-                        if (data.search(new RegExp("[.]")) == -1) {
-                            return { "name": data, "type": "folder" }
-                        }
-                        else {
-                            return { "name": data, "type": "object" }
-                        }
-                    });
-                    res.status(200).json(data).end();
-                }
-            }
-            else {
-                res.status(200).json(data).end();
-            }
-        } catch (error) {
-            res.status(500).json({ "Message": "Server Error" }).end();
-        }
-    }
-
+    
     async stats(req, res) {
         let name = req.params.name;
         fs.stat(`./data/${name}`, async (err, data) => {
@@ -134,7 +84,7 @@ class Bucket {
                     }
                     else {
                         await this.db.run("UPDATE buckets SET name = ? WHERE owner = ?", [req.body.name, req.body.nick]);
-                        res.status(200).json({ "urlBucket": `${process.env.PROTOCOL}://${req.headers.host}/${req.body.name}` }).end();
+                        res.status(200).json({ "urlBucket": `${process.env.HOST}/${req.body.name}` }).end();
                     }
                 })
             }

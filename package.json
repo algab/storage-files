@@ -10,7 +10,6 @@
   "author": "Álvaro Oliveira",
   "license": "ISC",
   "dependencies": {
-    "consign": "^0.1.6",
     "cors": "^2.8.5",
     "crypto-js": "^3.1.9-1",
     "dotenv": "^8.0.0",
@@ -22,6 +21,7 @@
     "joi": "^14.3.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
+    "nodemailer": "^6.2.1",
     "prettysize": "^2.0.0",
     "socket.io": "^2.2.0",
     "sqlite3": "^4.0.8"

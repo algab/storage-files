@@ -1,11 +1,14 @@
 "use strict";
 
+const router = require('express').Router();
 const auth = require("../middlewares/auth");
 
 module.exports = app => {
-    const object = app.controllers.object;
+    const object = require("../controllers/object")(app);
 
-    app.post(`${app.get("version")}/objects/upload`, auth.object, object.upload);
-    app.get(`${app.get("version")}/objects/:name`, auth.object, object.stats);
-    app.delete(`${app.get("version")}/objects/:name`, auth.object, object.delete);
+    router.post(`/upload`, auth.object, object.upload);
+    router.get(`/:name`, auth.object, object.stats);
+    router.delete(`/:name`, auth.object, object.delete);
+
+    return router;
 }

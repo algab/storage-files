@@ -23,5 +23,3 @@ date VARCHAR(50) NOT NULL,
 owner VARCHAR(10) NOT NULL,
 FOREIGN KEY (owner) REFERENCES users(nick)
 );
-
-INSERT INTO managers (name,email,password) VALUES ("admin","admin@email.com","")

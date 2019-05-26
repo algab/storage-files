@@ -1,17 +1,20 @@
 "use strict";
 
+const router = require('express').Router();
+const model = require("../models/user");
 const validate = require("../middlewares/validate");
 const auth = require("../middlewares/auth");
 
 module.exports = app => {
-    const user = app.controllers.user;
-    const model = app.models.user;
+    const user = require("../controllers/user")(app);
 
-    app.post(`${app.get("version")}/users`, validate(model), user.save);
-    app.get(`${app.get("version")}/users`, auth.manager, user.list);
-    app.get(`${app.get("version")}/users/:nick`, auth.user, user.search);
-    app.put(`${app.get("version")}/users/:nick`, auth.user, validate(model), user.edit);
-    app.put(`${app.get("version")}/users/:nick/password`, auth.user, user.password);
-    app.put(`${app.get("version")}/users/:nick/token`, auth.user, user.token);
-    app.delete(`${app.get("version")}/users/:nick`, auth.user, user.delete);
+    router.post(`/`, validate(model), user.save);
+    router.get(`/`, auth.manager, user.list);
+    router.get(`/:nick`, auth.user, user.search);
+    router.put(`/:nick`, auth.user, validate(model), user.edit);
+    router.put(`/:nick/password`, auth.user, user.password);
+    router.put(`/:nick/token`, auth.user, user.token);
+    router.delete(`/:nick`, auth.user, user.delete);
+
+    return router;
 }

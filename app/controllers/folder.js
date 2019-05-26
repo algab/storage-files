@@ -23,7 +23,7 @@ class Folder {
                 }
             }
             else {
-                res.status(201).json({ "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${req.body.bucket}/${req.body.folder}` }).end();
+                res.status(201).json({ "urlFolder": `${process.env.HOST}/${req.body.bucket}/${req.body.folder}` }).end();
             }
         });
     }
@@ -67,7 +67,7 @@ class Folder {
                 }
             }
             else {
-                res.status(200).json({ "urlFolder": `${process.env.PROTOCOL}://${req.headers.host}/${req.body.bucket}/${req.body.folder}` }).end();
+                res.status(200).json({ "urlFolder": `${process.env.HOST}/${req.body.bucket}/${req.body.folder}` }).end();
             }
         })
     }

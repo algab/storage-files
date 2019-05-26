@@ -24,7 +24,7 @@ class Object {
                         form.parse(req, () => { });
                         form.on("progress", (rec, exp) => {
                             let total = (rec / exp) * 100;
-                            this.socket.emit("", { "percent": parseInt(total) });
+                            this.socket.emit(res.locals.nick, { "percent": parseInt(total) });
                         });
                         form.on('file', async (err, file) => {
                             let nameObject = file.name;
@@ -44,8 +44,8 @@ class Object {
                                 }
                                 else {
                                     res.status(200).json({
-                                        "Message": "Object save successful",
-                                        "urlObject": `${process.env.PROTOCOL}://${req.headers.host}/${nameBucket}/${nameFolder}/${nameObject}`
+                                        "Message": "Object saved successful",
+                                        "urlObject": `${process.env.HOST}/${nameBucket}/${nameFolder}/${nameObject}`
                                     }).end();
                                 }
                             });
@@ -60,7 +60,7 @@ class Object {
                     form.parse(req, () => { });
                     form.on("progress", (rec, exp) => {
                         let total = (rec / exp) * 100;
-                        this.socket.emit("", { "percent": parseInt(total) });
+                        this.socket.emit(res.locals.nick, { "percent": parseInt(total) });
                     });
                     form.on('file', async (err, file) => {
                         let nameObject = file.name;
@@ -80,8 +80,8 @@ class Object {
                             }
                             else {
                                 res.status(200).json({
-                                    "Message": "Object save successful",
-                                    "urlObject": `${process.env.PROTOCOL}://${req.headers.host}/${nameBucket}/${nameObject}`
+                                    "Message": "Object saved successful",
+                                    "urlObject": `${process.env.HOST}/${nameBucket}/${nameObject}`
                                 }).end();
                             }
                         });
@@ -159,6 +159,7 @@ class Object {
     }
 
     async delete(req, res) {
+        let nameObject = req.params.name;
         let nameBucket = req.query.bucket;
         if (nameBucket) {
             if (fs.existsSync(`./data/${nameBucket}`)) {

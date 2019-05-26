@@ -1,5 +1,7 @@
 # STORAGE FILES
 
+![](https://raw.githubusercontent.com/algab/storage-files/updates/logo.png)
+
 API for files storage and control.
 
 ### PASTA

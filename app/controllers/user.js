@@ -61,11 +61,11 @@ class User {
     async search(req, res) {
         try {
             let nick = req.params.nick;
-            let user = await this.db.all("SELECT * FROM users WHERE nick = ?", [nick]);
-            if (user[0]) {
-                delete user[0].password;
+            let user = await this.db.get("SELECT * FROM users WHERE nick = ?", [nick]);
+            if (user) {
+                delete user.password;
             }
-            res.status(200).json(user[0]).end();
+            res.status(200).json(user).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
         }
@@ -76,17 +76,14 @@ class User {
             let nick = req.params.nick;
             let data = req.body;
             let user = await this.db.all("SELECT email FROM users WHERE nick = ?", [nick]);
-            if (data.password) {
-                delete data.password;
-            }
             if (data.email == user[0].email) {
-                await this.db.run("UPDATE users SET name = ?, country = ?, state = ?, city = ?, email = ?, password = ? WHERE nick = ?", [data.name, data.country, data.state, data.city, data.email, data.password, data.nick]);
+                await this.db.run("UPDATE users SET name = ?, country = ?, state = ?, city = ?, email = ? WHERE nick = ?", [data.name, data.country, data.state, data.city, data.email, data.nick]);
                 res.status(200).json({ "Message": "User updated successful" }).end();
             }
             else {
                 let email = await this.db.all("SELECT email FROM users WHERE email = ?", [data.email])
                 if (email.length == 0) {
-                    await this.db.run("UPDATE users SET name = ?, country = ?, state = ?, city = ?, email = ?, password = ? WHERE nick = ?", [data.name, data.country, data.state, data.city, data.email, data.password, data.nick]);
+                    await this.db.run("UPDATE users SET name = ?, country = ?, state = ?, city = ?, email = ? WHERE nick = ?", [data.name, data.country, data.state, data.city, data.email, data.nick]);
                     res.status(200).json({ "Message": "User updated successful" }).end();
                 }
                 else {
@@ -104,7 +101,7 @@ class User {
             if (req.body.password) {
                 req.body.password = hasha(req.body.password, { 'algorithm': 'md5' });
                 await this.db.run("UPDATE users SET password = ? WHERE nick = ?", [req.body.password, nick]);
-                res.status(200).json({ "Message": "Password change successful" }).end();
+                res.status(200).json({ "Message": "Password changed successful" }).end();
             }
             else {
                 res.status(400).json({ "Message": "Password is required" }).end()
@@ -117,7 +114,7 @@ class User {
     async token(req, res) {
         try {
             let nick = req.params.nick;
-            const encrypt = crypto.AES.encrypt(JSON.stringify({ nick, type: "app" }), process.env.TOKEN_SECRET);
+            const encrypt = crypto.AES.encrypt(JSON.stringify({ nick, type: "app", date: moment().tz('America/Fortaleza').format() }), process.env.TOKEN_SECRET);
             res.status(200).json({ "token": `Bearer ${encrypt.toString()}` }).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();

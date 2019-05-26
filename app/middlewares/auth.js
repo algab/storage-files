@@ -34,13 +34,13 @@ class Auth {
             let token = req.headers.authorization.slice(7);            
             let bytes = crypto.AES.decrypt(token, process.env.TOKEN_SECRET);
             let data = JSON.parse(bytes.toString(crypto.enc.Utf8));  
-            if (await this.validate(data.date)) {
+            if (await this.validate(data.date) && (data.type === "user" || data.type === "manager")) {
                 next();
             }
-            else {
+            else {                
                 res.status(401).send('Unauthorized').end();
             }          
-        } catch (error) {
+        } catch (error) {          
             res.status(401).send('Unauthorized').end();
         }
     }
@@ -52,12 +52,15 @@ class Auth {
             let data = JSON.parse(bytes.toString(crypto.enc.Utf8));
             if (req.params.name && await this.validate(data.date) && data.type === "user") {
                 let bucket = await this.db.all("SELECT name FROM buckets WHERE owner = ?",[data.nick]);
-                if (bucket[0] === req.params.name) {
+                if (bucket[0].name === req.params.name) {
                     next();
                 }
                 else {
                     res.status(401).send('Unauthorized').end();
                 } 
+            } 
+            else if (req.body.name && await this.validate(data.date) && data.type === "user") {
+                next();
             } 
             else {
                 res.status(401).send('Unauthorized').end();
@@ -74,7 +77,7 @@ class Auth {
             let data = JSON.parse(bytes.toString(crypto.enc.Utf8));
             if (req.body.bucket && await this.validate(data.date) && data.type === "user") {
                 let bucket = await this.db.all("SELECT name FROM buckets WHERE owner = ?",[data.nick]);
-                if (bucket[0] === req.body.bucket) {
+                if (bucket[0].name === req.body.bucket) {
                     next();
                 }
                 else {
@@ -83,7 +86,7 @@ class Auth {
             } 
             else if (req.query.bucket && await this.validate(data.date) && data.type === "user") {
                 let bucket = await this.db.all("SELECT name FROM buckets WHERE owner = ?",[data.nick]);
-                if (bucket[0] === req.query.bucket) {
+                if (bucket[0].name === req.query.bucket) {
                     next();
                 }
                 else {
@@ -105,7 +108,8 @@ class Auth {
             let data = JSON.parse(bytes.toString(crypto.enc.Utf8)); 
             if (req.query.bucket && await this.validate(data.date) && data.type === "user") {
                 let bucket = await this.db.all("SELECT name FROM buckets WHERE owner = ?",[data.nick]);
-                if (bucket[0] === req.query.bucket) {
+                if (bucket[0].name === req.query.bucket) {
+                    res.locals.nick = data.nick;
                     next();
                 }
                 else {
@@ -114,7 +118,8 @@ class Auth {
             }
             else if (req.query.bucket && data.type === "app") {
                 let bucket = await this.db.all("SELECT name FROM buckets WHERE owner = ?",[data.nick]);
-                if (bucket[0] === req.query.bucket) {
+                if (bucket[0].name === req.query.bucket) {
+                    res.locals.nick = data.nick;
                     next();
                 }
                 else {
@@ -130,7 +135,7 @@ class Auth {
     }
 
     async validate(date) {
-        let tokenDate = moment(date).add(2, "hour").format();
+        let tokenDate = moment(date).add(parseFloat(process.env.TOKEN_EXP), "hour").format();
         let result = moment(tokenDate).startOf("hour").fromNow().toString();       
         if (result.search("ago") != -1) {
             return false;
