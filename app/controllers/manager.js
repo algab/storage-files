@@ -15,13 +15,19 @@ class Manager {
 
     async save(req, res) {
         try {
-            if (req.body.password) {
-                req.body.password = hasha(req.body.password, { 'algorithm': 'md5' });
-                await this.db.run("INSERT INTO managers (name,email,password) VALUES (?,?,?)", [req.body.name, req.body.email, req.body.password]);
-                res.status(201).json(req.body).end();
+            const result = await this.verifyEmail(req.body.email);
+            if (result) {
+                if (req.body.password) {
+                    req.body.password = hasha(req.body.password, { 'algorithm': 'md5' });
+                    await this.db.run("INSERT INTO managers (name,email,password) VALUES (?,?,?)", [req.body.name, req.body.email, req.body.password]);
+                    res.status(201).json(req.body).end();
+                }
+                else {
+                    res.status(400).json({ "Message": "Password is required" }).end();
+                }
             }
             else {
-                res.status(400).json({ "Message": "Password is required" }).end();
+                res.status(409).json({ "Message": "Email conflict" }).end();
             }
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
@@ -100,6 +106,26 @@ class Manager {
             res.status(200).json({ "Message": "Manager removed successful" }).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
+        }
+    }
+
+    async verifyEmail(email) {
+        try {
+            const user = await this.db.all("SELECT email FROM users WHERE email = ?", [email]);
+            if (user.length == 0) {
+                const manager = await this.db.all("SELECT email FROM managers WHERE email = ?", [email]);
+                if (manager.length == 0) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        } catch (error) {
+            return false;
         }
     }
 }

@@ -8,12 +8,12 @@ const validate = require("../middlewares/validate");
 module.exports = app => {
     const manager = require("../controllers/manager")(app);
 
-    router.post(`/`, validate(model), manager.save);
-    router.get(`/`, manager.list);
-    router.get(`/:id`, manager.search);
-    router.put(`/:id`, validate(model), manager.edit);
-    router.put(`/:id/password`, manager.password);
-    router.delete(`/:id`, manager.delete);
+    router.post(`/`, auth.manager, validate(model), manager.save);
+    router.get(`/`, auth.manager, manager.list);
+    router.get(`/:id`, auth.manager, manager.search);
+    router.put(`/:id`, auth.manager, validate(model), manager.edit);
+    router.put(`/:id/password`, auth.manager, manager.password);
+    router.delete(`/:id`, auth.manager, manager.delete);
 
     return router;
 }

@@ -20,8 +20,6 @@ COPY . .
 
 EXPOSE 8080
 
-RUN sqlite3 data/storage.db < storage.sql
-
 CMD ["npm","start"]
 
 VOLUME /home/node/app/data

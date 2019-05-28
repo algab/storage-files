@@ -19,11 +19,8 @@ class User {
     async save(req, res) {
         try {
             let data = req.body;
-            let email = await this.db.all("SELECT * FROM users WHERE email = ?", [data.email]);
-            if (email.length != 0) {
-                res.status(409).json({ "Message": "Email already exists" }).end();
-            }
-            else {
+            const result = await this.verifyEmail(data.email);
+            if (result) {
                 let nick = await this.db.all("SELECT nick FROM users WHERE nick = ?", [data.nick]);
                 if (nick.length != 0) {
                     res.status(409).json({ "Message": "Nick already exists" }).end();
@@ -39,6 +36,9 @@ class User {
                         res.status(400).json({ "Message": "Password is required" }).end();
                     }
                 }
+            }
+            else {
+                res.status(409).json({ "Message": "Email conflict" }).end();                
             }
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
@@ -128,6 +128,26 @@ class User {
             res.status(200).json({ "Message": "User removed successful" }).end();
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
+        }
+    }
+
+    async verifyEmail(email) {
+        try {
+            const user = await this.db.all("SELECT email FROM users WHERE email = ?", [email]);
+            if (user.length == 0) {
+                const manager = await this.db.all("SELECT email FROM managers WHERE email = ?", [email]);
+                if (manager.length == 0) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        } catch (error) {
+            return false;
         }
     }
 }

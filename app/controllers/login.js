@@ -17,13 +17,12 @@ class Login {
             let data = req.body
             if (data.email && data.password) {
                 data.password = hasha(data.password, { 'algorithm': 'md5' });
-                const result = await this.db.all("SELECT * FROM users WHERE email = ? and password = ?", [data.email, data.password]);
-                if (result[0] == null) {
+                const result = await this.searchLogin(data.email,data.password);
+                if (result == null) {
                     res.status(404).json({ "Message": "Email or password incorret" }).end();
                 }
                 else {
-                    result[0].token = await this.generateToken(result[0].nick, "user");
-                    res.status(200).json(result[0]).end();
+                    res.status(200).json(result).end();
                 }
             }
             else {
@@ -42,11 +41,21 @@ class Login {
                     let password = await this.generatePassword();
                     let encryptPassword = hasha(password, { 'algorithm': 'sha256' });
                     await this.db.run("UPDATE users SET password = ? WHERE nick = ?", [encryptPassword, user.nick]);
-                    await this.email.forgotPassword(user.name,user.email,password);
+                    await this.email.forgotPassword(user.name, user.email, password);
                     res.status(200).json({ "Message": "Password changed successful" }).end();
                 }
                 else {
-                    res.status(404).json({ "Message": "Email not found" }).end();
+                    let manager = await this.db.get("SELECT * FROM managers WHERE email = ?", [req.body.email]);  
+                    if (manager) {
+                        let password = await this.generatePassword();
+                        let encryptPassword = hasha(password, { 'algorithm': 'sha256' });
+                        await this.db.run("UPDATE managers SET password = ? WHERE id = ?", [encryptPassword, manager.id]);
+                        await this.email.forgotPassword(manager.name, manager.email, password);
+                        res.status(200).json({ "Message": "Password changed successful" }).end();
+                    }
+                    else {
+                        res.status(404).json({ "Message": "Email not found" }).end();
+                    }                  
                 }
             }
             else {
@@ -54,6 +63,26 @@ class Login {
             }
         } catch (error) {
             res.status(500).json({ "Message": "Server Error" }).end();
+        }
+    }
+
+    async searchLogin(email, password) {
+        const user = await this.db.get("SELECT * FROM users WHERE email = ? and password = ?", [email, password]);
+        if (user) {
+            user.type = "user";
+            user.token = await this.generateToken(user.nick, user.type);
+            return user;
+        }
+        else {
+            const manager = await this.db.get("SELECT * FROM managers WHERE email = ? and password = ?", [email, password]);
+            if (manager) {
+                manager.type = "manager";
+                manager.token = await this.generateToken(String(manager.id), user.type);
+                return manager;
+            }
+            else {
+                return {};
+            }
         }
     }
 
