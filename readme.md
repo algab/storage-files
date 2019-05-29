@@ -1,15 +1,31 @@
 # STORAGE FILES
 
-API DE CONTROLE E ARMAZENAMENTO DE ARQUIVOS
+<p align="center">
+  <img src="https://raw.githubusercontent.com/algab/storage-files/master/logo.png">
+</p>
 
-### PASTA
+API for files storage and control.
 
-O Diretório principal onde os arquivos serão armazenados. Pasta pode conter um ou mais subpastas e também um ou mais objetos.
+## Description
 
-### SUBPASTA
+### Bucket
 
-É um diretório filho, ou seja, ele pertence a uma pasta. Uma subpasta não pode conter outras subpastas e sim objetos.
+The bucket is the main directory where the files will be stored. A bucket may contain one or more folders and also one or more objects. A user can create only one bucket.
 
-### OBJETO
+Attention buckets of the same name are not allowed.
 
-São arquivos binários que estão armazenados dentro de uma pasta ou subpasta. Qualquer arquivo binário pode ser armazenado, como videos, áudio e imagens.
+### Folder
+
+Folder is a child directory, meaning it belongs to a bucket. A folder can not contain other folders, only objects. Within a bucket can contain as many folders as the user wants to create.
+
+Attention is not allowed folders with the same name.
+
+### Object
+
+Objects is any binary file that will be stored inside a bucket.
+
+
+## Why SocketIO ?
+
+The socketIO is used to transmit the upload percentage of the files. From the user's nickname, it is possible to capture the percentage of the upload.
+
