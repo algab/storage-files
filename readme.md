@@ -1,7 +1,7 @@
 # STORAGE FILES
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/algab/storage-files/updates/logo.png">
+  <img src="https://raw.githubusercontent.com/algab/storage-files/master/logo.png">
 </p>
 
 API for files storage and control.
