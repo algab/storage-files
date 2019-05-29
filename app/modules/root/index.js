@@ -1,10 +1,10 @@
 "use strict";
 
 const router = require('express').Router();
-const verify = require("../middlewares/verify");
+const verify = require("../../middlewares/verify");
 
 module.exports = () => {
-    const root = require("../controllers/root");
+    const root = require("./root");
 
     router.get(`/:name`, root.bucket);
     router.get(`/:bucket/:param`, verify.folder, root.folder);
