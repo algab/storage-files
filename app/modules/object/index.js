@@ -4,7 +4,7 @@ const router = require('express').Router();
 const auth = require("../../middlewares/auth");
 
 module.exports = app => {
-    const object = require("./object")(app);
+    const object = require("./controllers/object")(app);
 
     router.post(`/upload`, auth.object, object.upload);
     router.get(`/:name`, auth.object, object.stats);

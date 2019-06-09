@@ -6,7 +6,7 @@ const validate = require("../../middlewares/validate");
 const auth = require("../../middlewares/auth");
 
 module.exports = app => {
-    const folder = require("./folder")(app);
+    const folder = require("./controllers/folder")(app);
 
     router.post(`/`, auth.folder, validate(model), folder.save);
     router.get(`/:name`, auth.folder, folder.stats);

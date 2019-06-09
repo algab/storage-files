@@ -6,7 +6,7 @@ const validate = require("../../middlewares/validate");
 const auth = require("../../middlewares/auth");
 
 module.exports = app => {
-    const user = require("./user")(app);
+    const user = require("./controllers/user")(app);
 
     router.post(`/`, validate(model), user.save);
     router.get(`/`, auth.manager, user.list);

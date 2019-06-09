@@ -110,4 +110,4 @@ class Folder {
     }
 }
 
-module.exports = app => { return new Folder(app) }
+module.exports = app => new Folder(app);

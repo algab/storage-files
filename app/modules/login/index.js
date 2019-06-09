@@ -3,7 +3,7 @@
 const router = require('express').Router();
 
 module.exports = app => {
-    const login = require("./login")(app);
+    const login = require("./controllers/login")(app);
 
     router.post(`/`, login.login);
     router.put(`/password`, login.password);

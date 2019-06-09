@@ -130,4 +130,4 @@ class Manager {
     }
 }
 
-module.exports = app => { return new Manager(app) }
+module.exports = app => new Manager(app);

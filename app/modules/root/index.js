@@ -4,7 +4,7 @@ const router = require('express').Router();
 const verify = require("../../middlewares/verify");
 
 module.exports = () => {
-    const root = require("./root");
+    const root = require("./controllers/root");
 
     router.get(`/:name`, root.bucket);
     router.get(`/:bucket/:param`, verify.folder, root.folder);

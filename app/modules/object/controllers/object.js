@@ -241,4 +241,4 @@ class Object {
     }
 }
 
-module.exports = app => { return new Object(app) }
+module.exports = app => new Object(app);

@@ -6,7 +6,7 @@ const auth = require("../../middlewares/auth");
 const validate = require("../../middlewares/validate");
 
 module.exports = app => {
-    const bucket = require("./bucket")(app);
+    const bucket = require("./controllers/bucket")(app);
 
     router.post(`/`, auth.bucket, validate(model), bucket.save);
     router.get(`/:name`, auth.bucket, bucket.stats);

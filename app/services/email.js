@@ -21,14 +21,14 @@ class Email {
             }
         });
 
-        let email = {
+        let message = {
             from: `Storage Files <${process.env.EMAIL_USER}>`,
             to: `${name} <${email}>`,
             subject: "Alteração de Senha",
             html: `Olá ${name}, <br/><br/> A sua nova senha é ${password}.`
         }
 
-        transport.sendMail(email);
+        transport.sendMail(message);
     }
 }
 

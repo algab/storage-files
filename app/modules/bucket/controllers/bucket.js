@@ -151,4 +151,4 @@ class Bucket {
     }
 }
 
-module.exports = app => { return new Bucket(app) }
+module.exports = app => new Bucket(app); 

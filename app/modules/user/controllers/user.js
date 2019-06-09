@@ -152,4 +152,4 @@ class User {
     }
 }
 
-module.exports = app => { return new User(app) }
+module.exports = app => new User(app);

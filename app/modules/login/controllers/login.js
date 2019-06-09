@@ -7,7 +7,7 @@ const moment = require("moment-timezone");
 class Login {
     constructor(app) {
         this.db = app.get("database");
-        this.email = require("../../services/email");
+        this.email = require("../../../services/email");
         this.login = this.login.bind(this);
         this.password = this.password.bind(this);
     }
@@ -102,4 +102,4 @@ class Login {
     }
 }
 
-module.exports = app => { return new Login(app) }
+module.exports = app => new Login(app);
