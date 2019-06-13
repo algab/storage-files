@@ -1,7 +1,7 @@
 "use strict";
 
-const app = require("./config/express");
+const app = require("./src");
 
-app.listen(app.get("port"), () => {
-    console.log(`API Running on Port ${process.env.API_PORT} and SocketIO Running on Port ${process.env.SOCKET_PORT}`);
+app.listen(process.env.API_PORT, () => {
+    console.log(`API Running on Port ${process.env.API_PORT}`);
 });
