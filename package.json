@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node --use_strict server.js",
-    "dev": "./node_modules/.bin/nodemon --use_strict server.js"
+    "dev": "./node_modules/.bin/nodemon --use_strict server.js",
+    "lint": "./node_modules/.bin/eslint ."
   },
   "author": "Álvaro Oliveira",
   "license": "ISC",
@@ -27,6 +28,9 @@
     "sqlite3": "^4.0.8"
   },
   "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3",
     "nodemon": "^1.19.0"
   }
 }

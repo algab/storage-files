@@ -1,23 +1,19 @@
-"use strict";
+require('dotenv').config();
 
-require("dotenv").config();
+const express = require('express');
 
-const express = require("express");
-const database = require("./config/database");
+const app = express();
 
-var app = express();
+const server = require('http').Server(app);
 
-const server = require("http").Server(app);
-const socket = require("socket.io")(server);
-
-app.set("version", "/v1");
-app.set("database", database);
-app.set("socket", socket);
+app.set('version', '/v1');
+app.set('socket', require('socket.io')(server));
+app.set('database', require('./config/database'));
 
 app.use(express.json());
-app.use(require("cors")());
-app.use(require("helmet")({ noSniff: false }));
+app.use(require('cors')());
+app.use(require('helmet')({ noSniff: false }));
 
-require("./app")(app);
+require('./app')(app);
 
 module.exports = server;

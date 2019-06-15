@@ -1,6 +1,4 @@
-"use strict";
-
-const fs = require("fs");
+const fs = require('fs');
 
 class Root {
     constructor() {
@@ -9,87 +7,75 @@ class Root {
         this.object = this.object.bind(this);
     }
 
-    async bucket(req, res) {
+    async bucket({ params, query }, res) {
         try {
-            let name = req.params.bucket;
-            let type = req.query.type;
-            let data = await fs.readdirSync(`./data/${name}`);
+            let data = await fs.readdirSync(`./data/${params.bucket}`);
             if (data) {
-                if (type) {
-                    if (type === "folder") {
-                        let folders = []
-                        for (let i = 0; i < data.length; i++) {
-                            if (data[i].search(new RegExp("[.]")) == -1) {
-                                folders.push({ "name": data[i], "type": "folder" });
+                if (query.type) {
+                    if (query.type === 'folder') {
+                        const folders = [];
+                        for (let i = 0; i < data.length; i += 1) {
+                            if (data[i].search(new RegExp('[.]')) === -1) {
+                                folders.push({ name: data[i], type: 'folder' });
                             }
                         }
                         res.status(200).json(folders).end();
-                    }
-                    else if (type === "object") {
-                        let objects = [];
-                        for (let i = 0; i < data.length; i++) {
-                            if (data[i].search(new RegExp("[.]")) != -1) {
-                                objects.push({ "name": data[i], "type": "object" });
+                    } else if (query.type === 'object') {
+                        const objects = [];
+                        for (let i = 0; i < data.length; i += 1) {
+                            if (data[i].search(new RegExp('[.]')) !== -1) {
+                                objects.push({ name: data[i], type: 'object' });
                             }
                         }
                         res.status(200).json(objects).end();
-                    }
-                    else {
+                    } else {
                         res.status(200).json([]).end();
                     }
-                }
-                else {
-                    data = data.map(data => {
-                        if (data.search(new RegExp("[.]")) == -1) {
-                            return { "name": data, "type": "folder" }
+                } else {
+                    data = data.map((file) => {
+                        if (file.search(new RegExp('[.]')) === -1) {
+                            return { name: file, type: 'folder' };
                         }
-                        else {
-                            return { "name": data, "type": "object" }
-                        }
+                        return { name: file, type: 'object' };
                     });
                     res.status(200).json(data).end();
                 }
-            }
-            else {
+            } else {
                 res.status(200).json(data).end();
             }
         } catch (error) {
-            res.status(500).json({ "Message": "Server Error" }).end();
+            res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async folder(req, res) {
-        let nameBucket = req.params.bucket;
-        let param = req.params.param;
+    async folder({ params }, res) {
         if (res.locals.folder) {
-            fs.readdir(`./data/${nameBucket}/${param}`, (err, data) => {
+            fs.readdir(`./data/${params.bucket}/${params.param}`, (err, data) => {
                 if (err) {
-                    res.status(404).json({ "Message": "Bucket not found" }).end();
-                }
-                else {
+                    res.status(404).json({ Message: 'Bucket not found' }).end();
+                } else {
                     if (data.length > 0) {
-                        for (let i = 0; i < data.length; i++) {
-                            data[i] = { "name": data[i], "type": "object" }
+                        for (let i = 0; i < data.length; i += 1) {
+                            data[i] = { name: data[i], type: 'object' };
                         }
                     }
                     res.status(200).json(data).end();
                 }
             });
-        }
-        else {                    
-            let object = fs.createReadStream(`./data/${nameBucket}/${param}`);
-            object.on("error", (err) => {
-                res.status(404).json({ "Message": "Object not found" }).end();
-            });          
+        } else {
+            const object = fs.createReadStream(`./data/${params.bucket}/${params.param}`);
+            object.on('error', () => {
+                res.status(404).json({ Message: 'Object not found' }).end();
+            });
             object.pipe(res);
         }
     }
 
-    async object(req, res) {        
-        let object = fs.createReadStream(`./data/${req.params.bucket}/${req.params.folder}/${req.params.object}`);
-        object.on("error", (err) => {           
-            res.status(404).json({ "Message": "Object not found" }).end();
-        });        
+    async object({ params }, res) {
+        const object = fs.createReadStream(`./data/${params.bucket}/${params.folder}/${params.object}`);
+        object.on('error', () => {
+            res.status(404).json({ Message: 'Object not found' }).end();
+        });
         object.pipe(res);
     }
 }
