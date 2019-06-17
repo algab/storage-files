@@ -24,8 +24,12 @@
     "moment-timezone": "^0.5.25",
     "nodemailer": "^6.2.1",
     "prettysize": "^2.0.0",
+    "request": "^2.88.0",
     "socket.io": "^2.2.0",
-    "sqlite3": "^4.0.8"
+    "sqlite3": "^4.0.8",
+    "useragent": "^2.3.0",
+    "winston": "^3.2.1",
+    "yamlparser": "0.0.2"
   },
   "devDependencies": {
     "eslint": "^5.16.0",

@@ -6,6 +6,7 @@ const fs = require('fs');
 class ObjectController {
     constructor(app) {
         this.socket = app.get('socket');
+        this.logger = app.get('logger');
         this.upload = this.upload.bind(this);
         this.stats = this.stats.bind(this);
         this.delete = this.delete.bind(this);
@@ -34,11 +35,28 @@ class ObjectController {
                             fsExtra.move(file.path, `./data/${nameBucket}/${nameFolder}/${nameObject}`, (err) => {
                                 if (err) {
                                     if (err.errno === -17) {
+                                        this.logger.error({ nick: res.locals.nick, object: nameObject, message: 'Object already exists' }, { agent: req.headers['user-agent'] });
                                         res.status(409).json({ Message: 'Object already exists' }).end();
                                     } else {
-                                        res.status(500).json({ Message: 'Make sure the bucket name is correct and try again' }).end();
+                                        this.logger.error(
+                                            {
+                                                nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, message: 'Make sure the bucket name is correct and try again',
+                                            },
+                                            {
+                                                agent: req.headers['user-agent'],
+                                            },
+                                        );
+                                        res.status(500).json({ Message: 'Make sure the bucket and folder name is correct and try again' }).end();
                                     }
                                 } else {
+                                    this.logger.info(
+                                        {
+                                            nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, object: nameObject, message: 'Object saved successful',
+                                        },
+                                        {
+                                            agent: req.headers['user-agent'],
+                                        },
+                                    );
                                     res.status(200).json({
                                         Message: 'Object saved successful',
                                         urlObject: `${process.env.HOST}/${nameBucket}/${nameFolder}/${nameObject}`,
@@ -66,11 +84,21 @@ class ObjectController {
                         fsExtra.move(file.path, `./data/${nameBucket}/${nameObject}`, (err) => {
                             if (err) {
                                 if (err.errno === -17) {
+                                    this.logger.error({ nick: res.locals.nick, object: nameObject, message: 'Object already exists' }, { agent: req.headers['user-agent'] });
                                     res.status(409).json({ Message: 'Object already exists' }).end();
                                 } else {
+                                    this.logger.error({ nick: res.locals.nick, bucket: nameBucket, message: 'Make sure the bucket name is correct and try again' }, { agent: req.headers['user-agent'] });
                                     res.status(500).json({ Message: 'Make sure the bucket name is correct and try again' }).end();
                                 }
                             } else {
+                                this.logger.info(
+                                    {
+                                        nick: res.locals.nick, bucket: nameBucket, object: nameObject, message: 'Object saved successful',
+                                    },
+                                    {
+                                        agent: req.headers['user-agent'],
+                                    },
+                                );
                                 res.status(200).json({
                                     Message: 'Object saved successful',
                                     urlObject: `${process.env.HOST}/${nameBucket}/${nameObject}`,
@@ -99,6 +127,14 @@ class ObjectController {
                             if (err) {
                                 res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                             } else {
+                                this.logger.info(
+                                    {
+                                        nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, object: nameObject, message: 'Object stats',
+                                    },
+                                    {
+                                        agent: req.headers['user-agent'],
+                                    },
+                                );
                                 res.status(200).json({
                                     created: {
                                         date: this.generateDate(data.atime),
@@ -120,6 +156,14 @@ class ObjectController {
                         if (err) {
                             res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
                         } else {
+                            this.logger.info(
+                                {
+                                    nick: res.locals.nick, bucket: nameBucket, object: nameObject, message: 'Object stats',
+                                },
+                                {
+                                    agent: req.headers['user-agent'],
+                                },
+                            );
                             res.status(200).json({
                                 created: {
                                     date: this.generateDate(data.atime),
@@ -154,6 +198,14 @@ class ObjectController {
                             if (err) {
                                 res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                             } else {
+                                this.logger.info(
+                                    {
+                                        nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, object: nameObject, message: 'Object delete',
+                                    },
+                                    {
+                                        agent: req.headers['user-agent'],
+                                    },
+                                );
                                 res.status(200).json({ Message: 'Object deleted successfully' }).end();
                             }
                         });
@@ -165,6 +217,14 @@ class ObjectController {
                         if (err) {
                             res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
                         } else {
+                            this.logger.info(
+                                {
+                                    nick: res.locals.nick, bucket: nameBucket, object: nameObject, message: 'Object delete',
+                                },
+                                {
+                                    agent: req.headers['user-agent'],
+                                },
+                            );
                             res.status(200).json({ Message: 'Object deleted successfully' }).end();
                         }
                     });

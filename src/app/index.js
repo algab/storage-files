@@ -13,5 +13,5 @@ module.exports = (app) => {
     app.use(`${app.get('version')}/managers`, manager(app));
     app.use(`${app.get('version')}/objects`, object(app));
     app.use(`${app.get('version')}/users`, user(app));
-    app.use('', root());
+    app.use('', root(app));
 };

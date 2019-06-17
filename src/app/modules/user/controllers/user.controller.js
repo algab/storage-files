@@ -5,6 +5,7 @@ const hasha = require('hasha');
 class User {
     constructor(app) {
         this.db = app.get('database');
+        this.logger = app.get('logger');
         this.save = this.save.bind(this);
         this.list = this.list.bind(this);
         this.search = this.search.bind(this);
@@ -14,7 +15,7 @@ class User {
         this.delete = this.delete.bind(this);
     }
 
-    async save({ body }, res) {
+    async save({ headers, body }, res) {
         try {
             const data = body;
             const result = await this.verifyEmail(data.email);
@@ -27,6 +28,7 @@ class User {
                         data.password = hasha(data.password, { algorithm: 'md5' });
                         data.date = moment().tz('America/Fortaleza').format();
                         await this.db.run('INSERT INTO users (nick,name,country,state,city,email,password,date) VALUES (?,?,?,?,?,?,?,?)', [data.nick, data.name, data.country, data.state, data.city, data.email, data.password, data.date]);
+                        this.logger.info({ data, message: 'User save' }, { agent: headers['user-agent'] });
                         res.status(201).json(data).end();
                     }
                     res.status(400).json({ Message: 'Password is required' }).end();
@@ -35,6 +37,7 @@ class User {
                 res.status(409).json({ Message: 'Email conflict' }).end();
             }
         } catch (error) {
+            this.logger.error({ error, message: 'User save' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
@@ -46,74 +49,87 @@ class User {
                 delete data.password;
                 return data;
             });
+            this.logger.info({ message: 'User list' }, { agent: req.headers['user-agent'] });
             res.status(200).json(users).end();
         } catch (error) {
+            this.logger.error({ error, message: 'User list' }, { agent: req.headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async search({ params }, res) {
+    async search({ headers, params }, res) {
         try {
             const user = await this.db.get('SELECT * FROM users WHERE nick = ?', [params.nick]);
             if (user) {
                 delete user.password;
             }
+            this.logger.info({ nick: params.nick, message: 'User search' }, { agent: headers['user-agent'] });
             res.status(200).json(user).end();
         } catch (error) {
+            this.logger.error({ error, message: 'User search' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async edit({ body, params }, res) {
+    async edit({ headers, body, params }, res) {
         try {
             const data = body;
             const user = await this.db.all('SELECT email FROM users WHERE nick = ?', [params.nick]);
             if (data.email === user[0].email) {
                 await this.db.run('UPDATE users SET name = ?, country = ?, state = ?, city = ?, email = ? WHERE nick = ?', [data.name, data.country, data.state, data.city, data.email, data.nick]);
+                this.logger.info({ nick: params.nick, message: 'User update' }, { agent: headers['user-agent'] });
                 res.status(200).json({ Message: 'User updated successful' }).end();
             } else {
                 const verify = await this.verifyEmail(data.email);
                 if (verify) {
                     await this.db.run('UPDATE users SET name = ?, country = ?, state = ?, city = ?, email = ? WHERE nick = ?', [data.name, data.country, data.state, data.city, data.email, data.nick]);
+                    this.logger.info({ nick: params.nick, message: 'User update' }, { agent: headers['user-agent'] });
                     res.status(200).json({ Message: 'User updated successful' }).end();
                 } else {
                     res.status(409).json({ Message: 'Email already exists' }).end();
                 }
             }
         } catch (error) {
+            this.logger.error({ error, message: 'User edit' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async password({ body, params }, res) {
+    async password({ headers, body, params }, res) {
         try {
             const data = body;
             if (data.password) {
                 data.password = hasha(data.password, { algorithm: 'md5' });
                 await this.db.run('UPDATE users SET password = ? WHERE nick = ?', [data.password, params.nick]);
+                this.logger.info({ nick: params.nick, message: 'User password' }, { agent: headers['user-agent'] });
                 res.status(200).json({ Message: 'Password changed successful' }).end();
             } else {
                 res.status(400).json({ Message: 'Password is required' }).end();
             }
         } catch (error) {
+            this.logger.error({ error, message: 'User password' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async token({ params }, res) {
+    async token({ headers, params }, res) {
         try {
             const encrypt = crypto.AES.encrypt(JSON.stringify({ nick: params.nick, type: 'app', date: moment().tz('America/Fortaleza').format() }), process.env.TOKEN_SECRET);
+            this.logger.info({ nick: params.nick, message: 'User token' }, { agent: headers['user-agent'] });
             res.status(200).json({ token: `Bearer ${encrypt.toString()}` }).end();
         } catch (error) {
+            this.logger.error({ error, message: 'User token' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async delete({ params }, res) {
+    async delete({ headers, params }, res) {
         try {
             await this.db.run('DELETE FROM users WHERE nick = ?', [params.nick]);
+            this.logger.info({ nick: params.nick, message: 'User delete' }, { agent: headers['user-agent'] });
             res.status(200).json({ Message: 'User removed successful' }).end();
         } catch (error) {
+            this.logger.error({ error, message: 'User delete' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }

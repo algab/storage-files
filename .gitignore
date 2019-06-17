@@ -2,3 +2,5 @@
 data/
 package-lock.json
 .env
+error.log
+logger.log

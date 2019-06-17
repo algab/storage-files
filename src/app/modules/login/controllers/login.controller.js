@@ -7,30 +7,34 @@ const emailService = require('../../../services/email.service');
 class Login {
     constructor(app) {
         this.db = app.get('database');
+        this.logger = app.get('logger');
         this.login = this.login.bind(this);
         this.password = this.password.bind(this);
     }
 
-    async login({ body }, res) {
+    async login({ headers, body }, res) {
         try {
             const data = body;
             if (data.email && data.password) {
                 data.password = hasha(data.password, { algorithm: 'md5' });
                 const result = await this.searchLogin(data.email, data.password);
                 if (result == null) {
+                    this.logger.warn({ email: data.email, message: 'Email or password incorret' }, { agent: headers['user-agent'] });
                     res.status(404).json({ Message: 'Email or password incorret' }).end();
                 } else {
+                    this.logger.info({ email: data.email, message: 'Login' }, { agent: headers['user-agent'] });
                     res.status(200).json(result).end();
                 }
             } else {
                 res.status(400).json({ Message: 'Email and password required' }).end();
             }
         } catch (error) {
+            this.logger.error({ error, message: 'Login' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async password({ body }, res) {
+    async password({ headers, body }, res) {
         try {
             if (body.email) {
                 const user = await this.db.get('SELECT * FROM users WHERE email = ?', [body.email]);
@@ -39,6 +43,7 @@ class Login {
                     const encryptPassword = hasha(password, { algorithm: 'md5' });
                     await this.db.run('UPDATE users SET password = ? WHERE nick = ?', [encryptPassword, user.nick]);
                     await emailService.forgotPassword(user.name, user.email, password);
+                    this.logger.info({ email: body.email, message: 'User password changed successful' }, { agent: headers['user-agent'] });
                     res.status(200).json({ Message: 'Password changed successful' }).end();
                 } else {
                     const manager = await this.db.get('SELECT * FROM managers WHERE email = ?', [body.email]);
@@ -47,8 +52,10 @@ class Login {
                         const encryptPassword = hasha(password, { algorithm: 'md5' });
                         await this.db.run('UPDATE managers SET password = ? WHERE id = ?', [encryptPassword, manager.id]);
                         await emailService.forgotPassword(manager.name, manager.email, password);
+                        this.logger.info({ email: body.email, message: 'Manager password changed successful' }, { agent: headers['user-agent'] });
                         res.status(200).json({ Message: 'Password changed successful' }).end();
                     } else {
+                        this.logger.warn({ email: body.email, message: 'Email not found (Password)' }, { agent: headers['user-agent'] });
                         res.status(404).json({ Message: 'Email not found' }).end();
                     }
                 }
@@ -56,6 +63,7 @@ class Login {
                 res.status(400).json({ Message: 'Email required' }).end();
             }
         } catch (error) {
+            this.logger.error({ error, message: 'Password' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }

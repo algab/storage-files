@@ -7,6 +7,7 @@ const app = express();
 const server = require('http').Server(app);
 
 app.set('version', '/v1');
+app.set('logger', require('./config/logger'));
 app.set('socket', require('socket.io')(server));
 app.set('database', require('./config/database'));
 
