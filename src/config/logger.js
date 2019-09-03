@@ -25,15 +25,6 @@ const logger = winston.createLogger({
             ),
         }),
         new winston.transports.File({
-            filename: 'warn.log',
-            level: 'warn',
-            format: winston.format.combine(
-                timestamp(),
-                agent(),
-                winston.format.json(),
-            ),
-        }),
-        new winston.transports.File({
             filename: 'logger.log',
             format: winston.format.combine(
                 timestamp(),

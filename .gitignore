@@ -1,7 +1,4 @@
 /node_modules
 data/
-package-lock.json
 .env
-error.log
-warn.log
-logger.log
+*.log

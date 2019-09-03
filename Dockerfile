@@ -1,7 +1,5 @@
 FROM ubuntu:18.10
 
-LABEL maintainer "Álvaro Oliveira <alvarogab6@gmail.com>"
-
 WORKDIR /home/node/app
 
 ENV TZ=America/Sao_Paulo
@@ -14,7 +12,7 @@ RUN apt-get -y update && apt-get -y install nodejs && apt-get -y install npm
 
 RUN apt-get -y install sqlite3 && apt-get -y upgrade
 
-RUN npm install
+RUN npm install --production
 
 COPY . .
 

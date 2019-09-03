@@ -9,12 +9,14 @@ const server = require('http').Server(app);
 app.set('version', '/v1');
 app.set('logger', require('./config/logger'));
 app.set('socket', require('socket.io')(server));
-app.set('database', require('./config/database'));
 
 app.use(express.json());
 app.use(require('cors')());
 app.use(require('helmet')({ noSniff: false }));
 
-require('./app')(app);
+require('./api')(app);
 
-module.exports = server;
+(async () => {
+    await app.listen(process.env.PORT);
+    console.log(`API Running on Port ${process.env.PORT}`);
+})();

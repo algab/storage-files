@@ -1,18 +1,17 @@
 {
   "name": "storage-files",
   "version": "1.5.0",
-  "description": "API for files storage and control.",
-  "main": "server.js",
+  "description": "API for files storage and control",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node --use_strict server.js",
-    "dev": "./node_modules/.bin/nodemon --use_strict server.js",
-    "lint": "./node_modules/.bin/eslint ."
+    "start": "node src",
+    "dev": "npx nodemon src",
+    "lint": "npx eslint ."
   },
   "author": "Álvaro Oliveira",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "crypto-js": "^3.1.9-1",
     "dotenv": "^8.0.0",
     "express": "^4.17.0",
     "formidable": "^1.2.1",
@@ -20,11 +19,12 @@
     "hasha": "^5.0.0",
     "helmet": "^3.18.0",
     "joi": "^14.3.1",
-    "moment": "^2.24.0",
+    "jsonwebtoken": "^8.5.1",
     "moment-timezone": "^0.5.25",
     "nodemailer": "^6.2.1",
     "prettysize": "^2.0.0",
     "request": "^2.88.0",
+    "sequelize": "^5.18.1",
     "socket.io": "^2.2.0",
     "sqlite3": "^4.0.8",
     "useragent": "^2.3.0",
