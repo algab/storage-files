@@ -17,6 +17,6 @@ app.use(require('helmet')({ noSniff: false }));
 require('./api')(app);
 
 (async () => {
-    await app.listen(process.env.PORT);
+    await server.listen(process.env.PORT);
     console.log(`API Running on Port ${process.env.PORT}`);
 })();

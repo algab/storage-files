@@ -10,7 +10,7 @@ const user = {
 };
 
 const dbUser = db.define('users', {
-    nick: { type: db.Sequelize.STRING, allowNull: false, primaryKey: true },
+    nick: { type: db.Sequelize.STRING, primaryKey: true },
     name: { type: db.Sequelize.STRING, allowNull: false },
     email: { type: db.Sequelize.STRING, allowNull: false },
     password: { type: db.Sequelize.STRING, allowNull: true },

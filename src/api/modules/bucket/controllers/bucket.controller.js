@@ -17,9 +17,9 @@ class BucketController {
 
     async save({ headers, body }, res) {
         try {
-            const verifyUser = await this.user.count({ where: { nick: body.nick } });
+            const verifyUser = await this.user.count({ where: { nick: body.user_nick } });
             if (verifyUser !== 0) {
-                const result = await this.bucket.count({ where: { user_nick: body.nick } });
+                const result = await this.bucket.count({ where: { user_nick: body.user_nick } });
                 if (result === 0) {
                     fs.mkdir(`./data/${body.name}`, async (err) => {
                         if (err) {

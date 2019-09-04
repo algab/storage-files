@@ -27,8 +27,9 @@ class UserController {
                         await this.user.create(data);
                         this.logger.info({ data, message: 'User save' }, { agent: headers['user-agent'] });
                         res.status(201).json(data).end();
+                    } else {
+                        res.status(400).json({ Message: 'Password is required' }).end();
                     }
-                    res.status(400).json({ Message: 'Password is required' }).end();
                 } else {
                     res.status(409).json({ Message: 'Nick already exists' }).end();
                 }

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const bucket = require('../models/bucket.model');
+const bucket = require('../models/bucket.model').dbBucket;
 
 class Auth {
     constructor() {
@@ -100,14 +100,14 @@ class Auth {
             const token = headers.authorization.slice(7);
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (body.bucket && decoded.permission === 'User') {
-                const result = await this.bucket.findOne({ where: { user_nick: body.nick } });
+                const result = await this.bucket.findOne({ where: { name: body.bucket } });
                 if (result.name === body.bucket) {
                     next();
                 } else {
                     res.status(401).send('Unauthorized').end();
                 }
             } else if (query.bucket && decoded.permission === 'User') {
-                const result = await this.bucket.findOne({ where: { user_nick: body.nick } });
+                const result = await this.bucket.findOne({ where: { name: query.bucket } });
                 if (result.name === query.bucket) {
                     next();
                 } else {
@@ -121,19 +121,19 @@ class Auth {
         }
     }
 
-    async object({ headers, body, query }, res, next) {
+    async object({ headers, query }, res, next) {
         try {
             const token = headers.authorization.slice(7);
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (query.bucket && decoded.permission === 'User') {
-                const result = await this.bucket.findOne({ where: { user_nick: body.nick } });
+                const result = await this.bucket.findOne({ where: { name: query.bucket } });
                 if (result.name === query.bucket) {
                     next();
                 } else {
                     res.status(401).send('Unauthorized').end();
                 }
             } else if (query.bucket && decoded.permission === 'App') {
-                const result = await this.bucket.findOne({ where: { user_nick: body.nick } });
+                const result = await this.bucket.findOne({ where: { name: query.bucket } });
                 if (result.name === query.bucket) {
                     next();
                 } else {

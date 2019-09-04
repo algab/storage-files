@@ -5,8 +5,8 @@ const user = require('./user.model').dbUser;
 
 const bucket = {
     name: joi.string().regex(/^[a-z,0-9]+$/).min(4).required(),
-    nick: joi.string().regex(/^[a-z,0-9]+$/).min(4).required(),
-    private: joi.boolean(),
+    user_nick: joi.string().regex(/^[a-z,0-9]+$/).min(4).required(),
+    private: joi.boolean().required(),
 };
 
 const dbBucket = db.define('buckets', {
@@ -16,10 +16,7 @@ const dbBucket = db.define('buckets', {
     user_nick: {
         type: db.Sequelize.STRING,
         allowNull: false,
-        references: {
-            model: user,
-            key: 'nick',
-        },
+        references: { model: user, key: 'nick' },
     },
 });
 
