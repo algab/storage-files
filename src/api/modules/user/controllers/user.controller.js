@@ -1,4 +1,5 @@
 const hasha = require('hasha');
+const jwt = require('jsonwebtoken');
 
 const user = require('../../../models/user.model').dbUser;
 
@@ -103,8 +104,9 @@ class UserController {
 
     async token({ headers, params }, res) {
         try {
+            const token = jwt.sign({ nick: params.nick, permission: 'App' }, process.env.JWT_SECRET);
             this.logger.info({ nick: params.nick, message: 'User token' }, { agent: headers['user-agent'] });
-            res.status(200).json({ token: 'Teste' }).end();
+            res.status(200).json({ token }).end();
         } catch (error) {
             this.logger.error({ error, message: 'User token' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();

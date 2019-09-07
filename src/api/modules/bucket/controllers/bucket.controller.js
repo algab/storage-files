@@ -60,13 +60,13 @@ class BucketController {
 
     async edit({ headers, body, params }, res) {
         try {
-            const verifyUser = await this.user.count({ where: { nick: body.nick } });
+            const verifyUser = await this.user.count({ where: { nick: body.user_nick } });
             if (verifyUser !== 0) {
                 fs.rename(`./data/${params.name}`, `./data/${body.name}`, async (err) => {
                     if (err) {
                         res.status(409).json({ Message: 'Bucket already exists' }).end();
                     } else {
-                        await this.bucket.update(body, { where: { user_nick: body.nick } });
+                        await this.bucket.update(body, { where: { user_nick: body.user_nick } });
                         this.logger.info({ data: body, message: 'Bucket edit' }, { agent: headers['user-agent'] });
                         res.status(200).json({ urlBucket: `${process.env.HOST}/${body.name}` }).end();
                     }

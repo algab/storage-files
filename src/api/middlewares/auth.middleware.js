@@ -128,6 +128,7 @@ class Auth {
             if (query.bucket && decoded.permission === 'User') {
                 const result = await this.bucket.findOne({ where: { name: query.bucket } });
                 if (result.name === query.bucket) {
+                    res.locals.nick = decoded.nick;
                     next();
                 } else {
                     res.status(401).send('Unauthorized').end();
@@ -135,6 +136,7 @@ class Auth {
             } else if (query.bucket && decoded.permission === 'App') {
                 const result = await this.bucket.findOne({ where: { name: query.bucket } });
                 if (result.name === query.bucket) {
+                    res.locals.nick = decoded.nick;
                     next();
                 } else {
                     res.status(401).send('Unauthorized').end();
