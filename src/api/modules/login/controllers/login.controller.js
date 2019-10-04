@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 const hasha = require('hasha');
 
-const user = require('../../../models/user.model').dbUser;
-const manager = require('../../../models/manager.model').dbManager;
-const bucket = require('../../../models/bucket.model').dbBucket;
+const user = require('../../../schemas/user.schema');
+const manager = require('../../../schemas/manager.schema');
+const bucket = require('../../../schemas/bucket.schema');
+
 const service = require('../../../services/email.service');
 
 class LoginController {

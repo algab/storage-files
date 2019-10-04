@@ -1,7 +1,7 @@
 const hasha = require('hasha');
 const jwt = require('jsonwebtoken');
 
-const user = require('../../../models/user.model').dbUser;
+const user = require('../../../schemas/user.schema');
 
 class UserController {
     constructor(app) {

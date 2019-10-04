@@ -1,6 +1,6 @@
 const hasha = require('hasha');
 
-const manager = require('../../../models/manager.model');
+const manager = require('../../../schemas/manager.schema');
 
 class ManagerController {
     constructor(app) {

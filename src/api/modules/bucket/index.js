@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const model = require('../../models/bucket.model').bucket;
+const model = require('../../models/bucket.model');
 const auth = require('../../middlewares/auth.middleware');
 const validate = require('../../middlewares/validate.middleware');
 const controller = require('./controllers/bucket.controller');

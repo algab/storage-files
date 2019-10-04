@@ -1,8 +1,8 @@
 const pretty = require('prettysize');
 const fs = require('fs');
 
-const user = require('../../../models/user.model').dbUser;
-const bucket = require('../../../models/bucket.model').dbBucket;
+const user = require('../../../schemas/user.schema');
+const bucket = require('../../../schemas/bucket.schema');
 
 class BucketController {
     constructor(app) {
