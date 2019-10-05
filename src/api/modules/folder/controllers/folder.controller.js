@@ -48,6 +48,9 @@ class FolderController {
                 if (err.errno === -17) {
                     res.status(409).json({ Message: 'Folder with the same name already exists' }).end();
                 }
+                if (err.errno === -13) {
+                    res.status(409).json({ Message: 'Folder is not empty' });
+                }
                 if (err.errno === -2) {
                     res.status(404).json({ Message: 'Bucket not found' }).end();
                 }

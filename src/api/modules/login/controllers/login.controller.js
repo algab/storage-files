@@ -99,7 +99,7 @@ class LoginController {
             return data;
         }
         const resultManager = await this.manager.findOne({ where: { email, password } });
-        if (manager) {
+        if (resultManager) {
             const data = resultManager.get({ plain: true });
             data.token = jwt.sign({ id: data.nick, permission: 'Manager' }, process.env.JWT_SECRET, { expiresIn: '1h' });
             return data;
@@ -110,8 +110,8 @@ class LoginController {
     generatePassword() {
         const chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXY!?@';
         let password = '';
-        for (let i = 0; i <= 8; i += 1) {
-            password = password.concat(chars.charAt(Math.random() * 61));
+        for (let i = 0; i < 7; i += 1) {
+            password = password.concat(chars.charAt(Math.random() * 64));
         }
         return password;
     }

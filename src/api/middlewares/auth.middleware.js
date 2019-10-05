@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const bucket = require('../models/bucket.model').dbBucket;
+const bucket = require('../schemas/bucket.schema');
 
 class Auth {
     constructor() {

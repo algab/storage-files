@@ -25,8 +25,8 @@ class UserController {
                 if (countNick === 0) {
                     if (data.password) {
                         data.password = hasha(data.password, { algorithm: 'md5' });
-                        await this.user.create(data);
-                        this.logger.info({ data, message: 'User save' }, { agent: headers['user-agent'] });
+                        const result = await this.user.create(data);
+                        this.logger.info({ Message: 'User save', user: result }, { agent: headers['user-agent'] });
                         res.status(201).json(data).end();
                     } else {
                         res.status(400).json({ Message: 'Password is required' }).end();

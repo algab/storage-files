@@ -7,7 +7,7 @@ const controller = require('./controllers/bucket.controller');
 module.exports = (app) => {
     const bucket = controller(app);
 
-    router.post('/', auth.bucketUser, validate(model), bucket.save);
+    router.post('/', validate(model), bucket.save);
     router.get('/:name', auth.bucketUser, bucket.stats);
     router.put('/:name', auth.bucketUser, validate(model), bucket.edit);
     router.delete('/:name', auth.bucketUser, bucket.delete);
