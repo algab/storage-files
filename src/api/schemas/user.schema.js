@@ -1,10 +1,23 @@
-const db = require('../../config/database');
+const { Model, DataTypes } = require('sequelize');
 
-const user = db.define('users', {
-    nick: { type: db.Sequelize.STRING, primaryKey: true },
-    name: { type: db.Sequelize.STRING, allowNull: false },
-    email: { type: db.Sequelize.STRING, allowNull: false },
-    password: { type: db.Sequelize.STRING, allowNull: true },
-});
+class User extends Model {
+    static init(sequelize) {
+        super.init({
+            nick: { type: DataTypes.STRING, primaryKey: true },
+            name: { type: DataTypes.STRING, allowNull: false },
+            email: { type: DataTypes.STRING, allowNull: false },
+            password: { type: DataTypes.STRING, allowNull: true },
+        }, { sequelize, tableName: 'users' });
+    }
 
-module.exports = user;
+    static associate(models) {
+        this.hasOne(models.Bucket, {
+            foreignKey: 'user_nick',
+            as: 'bucket',
+            onUpdate: 'cascade',
+            onDelete: 'cascade',
+        });
+    }
+}
+
+module.exports = User;
