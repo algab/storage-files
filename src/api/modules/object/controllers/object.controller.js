@@ -14,150 +14,70 @@ class ObjectController {
 
     async upload(req, res) {
         const nameBucket = req.query.bucket;
-        if (nameBucket) {
-            if (fs.existsSync(`./data/${nameBucket}`)) {
-                const nameFolder = req.query.folder;
-                if (nameFolder) {
-                    if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
-                        const form = new formidable.IncomingForm();
-                        form.parse(req, () => { });
-                        form.on('progress', (rec, exp) => {
-                            const percent = (rec / exp) * 100;
-                            this.socket.emit(res.locals.nick, { percent: parseInt(percent, 10) });
+        if (fs.existsSync(`./data/${nameBucket}`)) {
+            const nameFolder = req.query.folder;
+            if (nameFolder) {
+                if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
+                    this.uploadObject(req, res, `./data/${nameBucket}/${nameFolder}`)
+                        .then((result) => {
+                            this.logger.info({
+                                nick: res.locals.nick,
+                                object: result.nameObject,
+                                message: 'Object saved successful',
+                            }, { agent: req.headers['user-agent'] });
+                            res.status(200).json({
+                                Message: 'Object saved successful',
+                                urlObject: `${process.env.HOST}/${nameBucket}/${nameFolder}/${result.nameObject}`,
+                            }).end();
+                        })
+                        .catch((err) => {
+                            const result = JSON.parse(err.message);
+                            res.status(result.status).json({ Message: result.message }).end();
                         });
-                        form.on('file', async (_, file) => {
-                            let nameObject = await this.prepareName(file.name);
-                            const object = fs.existsSync(`./data/${nameBucket}/${nameFolder}/${nameObject}`);
-                            if (object) {
-                                const data = fs.readdirSync(`./data/${nameBucket}/${nameFolder}`);
-                                nameObject = await this.makeNameObject(data, nameObject);
-                            }
-                            fsExtra.move(file.path, `./data/${nameBucket}/${nameFolder}/${nameObject}`, (err) => {
-                                if (err) {
-                                    if (err.errno === -17) {
-                                        this.logger.error({ nick: res.locals.nick, object: nameObject, message: 'Object already exists' }, { agent: req.headers['user-agent'] });
-                                        res.status(409).json({ Message: 'Object already exists' }).end();
-                                    } else {
-                                        this.logger.error(
-                                            {
-                                                nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, message: 'Make sure the bucket name is correct and try again',
-                                            },
-                                            {
-                                                agent: req.headers['user-agent'],
-                                            },
-                                        );
-                                        res.status(500).json({ Message: 'Make sure the bucket and folder name is correct and try again' }).end();
-                                    }
-                                } else {
-                                    this.logger.info(
-                                        {
-                                            nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, object: nameObject, message: 'Object saved successful',
-                                        },
-                                        {
-                                            agent: req.headers['user-agent'],
-                                        },
-                                    );
-                                    res.status(200).json({
-                                        Message: 'Object saved successful',
-                                        urlObject: `${process.env.HOST}/${nameBucket}/${nameFolder}/${nameObject}`,
-                                    }).end();
-                                }
-                            });
-                        });
-                    } else {
-                        res.status(404).json({ Message: 'Folder not found' }).end();
-                    }
                 } else {
-                    const form = new formidable.IncomingForm();
-                    form.parse(req, () => { });
-                    form.on('progress', (rec, exp) => {
-                        const percent = (rec / exp) * 100;
-                        this.socket.emit(res.locals.nick, { percent: parseInt(percent, 10) });
-                    });
-                    form.on('file', async (_, file) => {
-                        let nameObject = await this.prepareName(file.name);
-                        const object = fs.existsSync(`./data/${nameBucket}/${nameObject}`);
-                        if (object) {
-                            const data = fs.readdirSync(`./data/${nameBucket}`);
-                            nameObject = await this.makeNameObject(data, nameObject);
-                        }
-                        fsExtra.move(file.path, `./data/${nameBucket}/${nameObject}`, (err) => {
-                            if (err) {
-                                if (err.errno === -17) {
-                                    this.logger.error({ nick: res.locals.nick, object: nameObject, message: 'Object already exists' }, { agent: req.headers['user-agent'] });
-                                    res.status(409).json({ Message: 'Object already exists' }).end();
-                                } else {
-                                    this.logger.error({ nick: res.locals.nick, bucket: nameBucket, message: 'Make sure the bucket name is correct and try again' }, { agent: req.headers['user-agent'] });
-                                    res.status(500).json({ Message: 'Make sure the bucket name is correct and try again' }).end();
-                                }
-                            } else {
-                                this.logger.info(
-                                    {
-                                        nick: res.locals.nick, bucket: nameBucket, object: nameObject, message: 'Object saved successful',
-                                    },
-                                    {
-                                        agent: req.headers['user-agent'],
-                                    },
-                                );
-                                res.status(200).json({
-                                    Message: 'Object saved successful',
-                                    urlObject: `${process.env.HOST}/${nameBucket}/${nameObject}`,
-                                }).end();
-                            }
-                        });
-                    });
+                    res.status(404).json({ Message: 'Folder not found' }).end();
                 }
             } else {
-                res.status(404).json({ Message: 'Bucket not found' }).end();
+                this.uploadObject(req, res, `./data/${nameBucket}`)
+                    .then((result) => {
+                        this.logger.info({
+                            nick: res.locals.nick,
+                            object: result.nameObject,
+                            message: 'Object saved successful',
+                        }, { agent: req.headers['user-agent'] });
+                        res.status(200).json({
+                            Message: 'Object saved successful',
+                            urlObject: `${process.env.HOST}/${nameBucket}/${result.nameObject}`,
+                        }).end();
+                    })
+                    .catch((err) => {
+                        const result = JSON.parse(err.message);
+                        res.status(result.status).json({ Message: result.message }).end();
+                    });
             }
         } else {
-            res.status(400).json({ Message: 'Bucket is required' }).end();
+            res.status(404).json({ Message: 'Bucket not found' }).end();
         }
     }
 
     async stats(req, res) {
         const nameObject = req.params.name;
         const nameBucket = req.query.bucket;
-        if (nameBucket) {
-            if (fs.existsSync(`./data/${nameBucket}`)) {
-                const nameFolder = req.query.folder;
-                if (nameFolder) {
-                    if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
-                        fs.stat(`./data/${nameBucket}/${nameFolder}/${nameObject}`, (err, data) => {
-                            if (err) {
-                                res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
-                            } else {
-                                this.logger.info(
-                                    {
-                                        nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, object: nameObject, message: 'Object stats',
-                                    },
-                                    {
-                                        agent: req.headers['user-agent'],
-                                    },
-                                );
-                                res.status(200).json({
-                                    created: data.atime,
-                                    access: data.birthtime,
-                                    size: pretty(data.size),
-                                }).end();
-                            }
-                        });
-                    } else {
-                        res.status(404).json({ Message: 'Folder not found' }).end();
-                    }
-                } else {
-                    fs.stat(`./data/${nameBucket}/${nameObject}`, (err, data) => {
+        if (fs.existsSync(`./data/${nameBucket}`)) {
+            const nameFolder = req.query.folder;
+            if (nameFolder) {
+                if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
+                    fs.stat(`./data/${nameBucket}/${nameFolder}/${nameObject}`, (err, data) => {
                         if (err) {
-                            res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
+                            res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                         } else {
-                            this.logger.info(
-                                {
-                                    nick: res.locals.nick, bucket: nameBucket, object: nameObject, message: 'Object stats',
-                                },
-                                {
-                                    agent: req.headers['user-agent'],
-                                },
-                            );
+                            this.logger.info({
+                                nick: res.locals.nick,
+                                bucket: nameBucket,
+                                folder: nameFolder,
+                                object: nameObject,
+                                message: 'Object stats',
+                            }, { agent: req.headers['user-agent'] });
                             res.status(200).json({
                                 created: data.atime,
                                 access: data.birthtime,
@@ -165,63 +85,74 @@ class ObjectController {
                             }).end();
                         }
                     });
+                } else {
+                    res.status(404).json({ Message: 'Folder not found' }).end();
                 }
             } else {
-                res.status(404).json({ Message: 'Bucket not found' }).end();
+                fs.stat(`./data/${nameBucket}/${nameObject}`, (err, data) => {
+                    if (err) {
+                        res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
+                    } else {
+                        this.logger.info({
+                            nick: res.locals.nick,
+                            bucket: nameBucket,
+                            object: nameObject,
+                            message: 'Object stats',
+                        }, { agent: req.headers['user-agent'] });
+                        res.status(200).json({
+                            created: data.atime,
+                            access: data.birthtime,
+                            size: pretty(data.size),
+                        }).end();
+                    }
+                });
             }
         } else {
-            res.status(400).json({ Message: 'Bucket is required' }).end();
+            res.status(404).json({ Message: 'Bucket not found' }).end();
         }
     }
 
     async delete(req, res) {
         const nameObject = req.params.name;
         const nameBucket = req.query.bucket;
-        if (nameBucket) {
-            if (fs.existsSync(`./data/${nameBucket}`)) {
-                const nameFolder = req.query.folder;
-                if (nameFolder) {
-                    if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
-                        fs.unlink(`./data/${nameBucket}/${nameFolder}/${nameObject}`, (err) => {
-                            if (err) {
-                                res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
-                            } else {
-                                this.logger.info(
-                                    {
-                                        nick: res.locals.nick, bucket: nameBucket, folder: nameFolder, object: nameObject, message: 'Object delete',
-                                    },
-                                    {
-                                        agent: req.headers['user-agent'],
-                                    },
-                                );
-                                res.status(200).json({ Message: 'Object deleted successfully' }).end();
-                            }
-                        });
-                    } else {
-                        res.status(404).json({ Message: 'Folder not found' }).end();
-                    }
-                } else {
-                    fs.unlink(`./data/${nameBucket}/${nameObject}`, (err) => {
+        if (fs.existsSync(`./data/${nameBucket}`)) {
+            const nameFolder = req.query.folder;
+            if (nameFolder) {
+                if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
+                    fs.unlink(`./data/${nameBucket}/${nameFolder}/${nameObject}`, (err) => {
                         if (err) {
-                            res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
+                            res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                         } else {
-                            this.logger.info(
-                                {
-                                    nick: res.locals.nick, bucket: nameBucket, object: nameObject, message: 'Object delete',
-                                },
-                                {
-                                    agent: req.headers['user-agent'],
-                                },
-                            );
+                            this.logger.info({
+                                nick: res.locals.nick,
+                                bucket: nameBucket,
+                                folder: nameFolder,
+                                object: nameObject,
+                                message: 'Object delete',
+                            }, { agent: req.headers['user-agent'] });
                             res.status(200).json({ Message: 'Object deleted successfully' }).end();
                         }
                     });
+                } else {
+                    res.status(404).json({ Message: 'Folder not found' }).end();
                 }
             } else {
-                res.status(404).json({ Message: 'Bucket not found' }).end();
+                fs.unlink(`./data/${nameBucket}/${nameObject}`, (err) => {
+                    if (err) {
+                        res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
+                    } else {
+                        this.logger.info({
+                            nick: res.locals.nick,
+                            bucket: nameBucket,
+                            object: nameObject,
+                            message: 'Object delete',
+                        }, { agent: req.headers['user-agent'] });
+                        res.status(200).json({ Message: 'Object deleted successfully' }).end();
+                    }
+                });
             }
         } else {
-            res.status(400).json({ Message: 'Bucket is required' }).end();
+            res.status(404).json({ Message: 'Bucket not found' }).end();
         }
     }
 
@@ -235,7 +166,6 @@ class ObjectController {
         }
         return name;
     }
-
 
     async makeNameObject(data, nameObject) {
         const split = nameObject.split('.');
@@ -262,6 +192,50 @@ class ObjectController {
             }
         }
         return `${split[0]}-${total + 1}.${split[1]}`;
+    }
+
+    uploadObject(req, res, path) {
+        return new Promise((resolve, reject) => {
+            const form = new formidable.IncomingForm();
+            form.parse(req, () => { });
+            form.on('progress', (rec, exp) => {
+                const percent = (rec / exp) * 100;
+                this.socket.emit(res.locals.nick, { percent: parseInt(percent, 10) });
+            });
+            form.on('file', async (_, file) => {
+                let nameObject = await this.prepareName(file.name);
+                const object = fs.existsSync(`${path}/${nameObject}`);
+                if (object) {
+                    const data = fs.readdirSync(path);
+                    nameObject = await this.makeNameObject(data, nameObject);
+                }
+                fsExtra.move(file.path, `${path}/${nameObject}`, (err) => {
+                    if (err) {
+                        if (err.errno === -17) {
+                            this.logger.error({
+                                nick: res.locals.nick,
+                                object: nameObject,
+                                message: 'Object already exists',
+                            }, { agent: req.headers['user-agent'] });
+                            reject(new Error(JSON.stringify({
+                                message: 'Object already exists',
+                                status: 409,
+                            })));
+                        }
+                        this.logger.error({
+                            nick: res.locals.nick,
+                            object: nameObject,
+                            message: 'Make sure the bucket and folder name is correct and try again',
+                        }, { agent: req.headers['user-agent'] });
+                        reject(new Error(JSON.stringify({
+                            message: 'Make sure the bucket and folder name is correct and try again',
+                            status: 500,
+                        })));
+                    }
+                    resolve({ nameObject });
+                });
+            });
+        });
     }
 }
 
