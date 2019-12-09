@@ -8,18 +8,17 @@ const bucket = require('../../../schemas/bucket.schema');
 const service = require('../../../services/email.service');
 
 class LoginController {
-    constructor(app) {
+    constructor() {
         this.user = user;
         this.manager = manager;
         this.bucket = bucket;
         this.service = service;
-        this.logger = app.get('logger');
         this.login = this.login.bind(this);
         this.password = this.password.bind(this);
         this.generatePassword = this.generatePassword.bind(this);
     }
 
-    async login({ headers, body }, res) {
+    async login({ headers, body, winston }, res) {
         try {
             const data = body;
             if (data.email && data.password) {
@@ -28,19 +27,19 @@ class LoginController {
                 if (result == null) {
                     res.status(404).json({ Message: 'Email or password incorret' }).end();
                 } else {
-                    this.logger.info({ email: data.email, message: 'Login' }, { agent: headers['user-agent'] });
+                    winston.info({ email: data.email, message: 'Login' }, { agent: headers['user-agent'] });
                     res.status(200).json(result).end();
                 }
             } else {
                 res.status(400).json({ Message: 'Email and password required' }).end();
             }
         } catch (error) {
-            this.logger.error({ error, message: 'Login' }, { agent: headers['user-agent'] });
+            winston.error({ error, message: 'Login' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async password({ headers, body }, res) {
+    async password({ headers, body, winston }, res) {
         try {
             if (body.email) {
                 const result = await this.user.findOne({ where: { email: body.email }, raw: true });
@@ -52,7 +51,7 @@ class LoginController {
                         { where: { nick: result.nick } },
                     );
                     await this.service.forgotPassword(result.name, result.email, password);
-                    this.logger.info({ email: body.email, message: 'User password changed' }, { agent: headers['user-agent'] });
+                    winston.info({ email: body.email, message: 'User password changed' }, { agent: headers['user-agent'] });
                     res.status(200).json({ Message: 'Password changed successful' }).end();
                 } else {
                     const resultManager = await this.manager.findOne({
@@ -70,7 +69,7 @@ class LoginController {
                             resultManager.email,
                             password,
                         );
-                        this.logger.info({ email: body.email, message: 'Manager password changed successful' }, { agent: headers['user-agent'] });
+                        winston.info({ email: body.email, message: 'Manager password changed' }, { agent: headers['user-agent'] });
                         res.status(200).json({ Message: 'Password changed successful' }).end();
                     } else {
                         res.status(404).json({ Message: 'Email not found' }).end();
@@ -80,7 +79,7 @@ class LoginController {
                 res.status(400).json({ Message: 'Email required' }).end();
             }
         } catch (error) {
-            this.logger.error({ error, message: 'Password' }, { agent: headers['user-agent'] });
+            winston.error({ error, message: 'Password' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
@@ -117,4 +116,4 @@ class LoginController {
     }
 }
 
-module.exports = app => new LoginController(app);
+module.exports = new LoginController();

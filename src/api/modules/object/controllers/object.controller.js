@@ -4,9 +4,7 @@ const fsExtra = require('fs-extra');
 const fs = require('fs');
 
 class ObjectController {
-    constructor(app) {
-        this.socket = app.get('socket');
-        this.logger = app.get('logger');
+    constructor() {
         this.upload = this.upload.bind(this);
         this.stats = this.stats.bind(this);
         this.delete = this.delete.bind(this);
@@ -20,7 +18,7 @@ class ObjectController {
                 if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
                     this.uploadObject(req, res, `./data/${nameBucket}/${nameFolder}`)
                         .then((result) => {
-                            this.logger.info({
+                            req.winston.info({
                                 nick: res.locals.nick,
                                 object: result.nameObject,
                                 message: 'Object saved successful',
@@ -40,7 +38,7 @@ class ObjectController {
             } else {
                 this.uploadObject(req, res, `./data/${nameBucket}`)
                     .then((result) => {
-                        this.logger.info({
+                        req.winston.info({
                             nick: res.locals.nick,
                             object: result.nameObject,
                             message: 'Object saved successful',
@@ -71,7 +69,7 @@ class ObjectController {
                         if (err) {
                             res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                         } else {
-                            this.logger.info({
+                            req.winston.info({
                                 nick: res.locals.nick,
                                 bucket: nameBucket,
                                 folder: nameFolder,
@@ -93,7 +91,7 @@ class ObjectController {
                     if (err) {
                         res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
                     } else {
-                        this.logger.info({
+                        req.winston.info({
                             nick: res.locals.nick,
                             bucket: nameBucket,
                             object: nameObject,
@@ -123,7 +121,7 @@ class ObjectController {
                         if (err) {
                             res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                         } else {
-                            this.logger.info({
+                            req.winston.info({
                                 nick: res.locals.nick,
                                 bucket: nameBucket,
                                 folder: nameFolder,
@@ -141,7 +139,7 @@ class ObjectController {
                     if (err) {
                         res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
                     } else {
-                        this.logger.info({
+                        req.winston.info({
                             nick: res.locals.nick,
                             bucket: nameBucket,
                             object: nameObject,
@@ -156,7 +154,7 @@ class ObjectController {
         }
     }
 
-    async prepareName(name) {
+    prepareName(name) {
         if (name.search('#') !== -1) {
             let nameObject = name.split('#')[0];
             for (let i = 1; i < name.split('#').length; i += 1) {
@@ -167,7 +165,7 @@ class ObjectController {
         return name;
     }
 
-    async makeNameObject(data, nameObject) {
+    makeNameObject(data, nameObject) {
         const split = nameObject.split('.');
         let total = 0;
         if (split.length === 2) {
@@ -200,19 +198,19 @@ class ObjectController {
             form.parse(req, () => { });
             form.on('progress', (rec, exp) => {
                 const percent = (rec / exp) * 100;
-                this.socket.emit(res.locals.nick, { percent: parseInt(percent, 10) });
+                req.socket.emit(res.locals.nick, { percent: parseInt(percent, 10) });
             });
             form.on('file', async (_, file) => {
-                let nameObject = await this.prepareName(file.name);
+                let nameObject = this.prepareName(file.name);
                 const object = fs.existsSync(`${path}/${nameObject}`);
                 if (object) {
                     const data = fs.readdirSync(path);
-                    nameObject = await this.makeNameObject(data, nameObject);
+                    nameObject = this.makeNameObject(data, nameObject);
                 }
                 fsExtra.move(file.path, `${path}/${nameObject}`, (err) => {
                     if (err) {
                         if (err.errno === -17) {
-                            this.logger.error({
+                            req.winston.error({
                                 nick: res.locals.nick,
                                 object: nameObject,
                                 message: 'Object already exists',
@@ -222,7 +220,7 @@ class ObjectController {
                                 status: 409,
                             })));
                         }
-                        this.logger.error({
+                        req.winston.error({
                             nick: res.locals.nick,
                             object: nameObject,
                             message: 'Make sure the bucket and folder name is correct and try again',
@@ -239,4 +237,4 @@ class ObjectController {
     }
 }
 
-module.exports = app => new ObjectController(app);
+module.exports = new ObjectController();

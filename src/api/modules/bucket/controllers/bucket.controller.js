@@ -5,17 +5,16 @@ const user = require('../../../schemas/user.schema');
 const bucket = require('../../../schemas/bucket.schema');
 
 class BucketController {
-    constructor(app) {
+    constructor() {
         this.user = user;
         this.bucket = bucket;
-        this.logger = app.get('logger');
         this.save = this.save.bind(this);
         this.stats = this.stats.bind(this);
         this.edit = this.edit.bind(this);
         this.delete = this.delete.bind(this);
     }
 
-    async save({ headers, body }, res) {
+    async save({ headers, body, winston }, res) {
         try {
             const verifyUser = await this.user.count({ where: { nick: body.user_nick } });
             if (verifyUser !== 0) {
@@ -26,7 +25,7 @@ class BucketController {
                             res.status(409).json({ Message: 'Bucket already exists' }).end();
                         } else {
                             await this.bucket.create(body);
-                            this.logger.info({ data: body, message: 'Bucket save' }, { agent: headers['user-agent'] });
+                            winston.info({ data: body, message: 'Bucket save' }, { agent: headers['user-agent'] });
                             res.status(201).json({ urlBucket: `${process.env.HOST}/${body.name}` }).end();
                         }
                     });
@@ -37,7 +36,7 @@ class BucketController {
                 res.status(404).json({ Message: 'User not found' }).end();
             }
         } catch (error) {
-            this.logger.error({ error, message: 'Bucket save' }, { agent: headers['user-agent'] });
+            winston.error({ error, message: 'Bucket save' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
@@ -52,13 +51,13 @@ class BucketController {
                     created: result.createdAt,
                     access: data.atime,
                     modified: data.mtime,
-                    size: pretty(await this.sizeBucket(params.name)),
+                    size: pretty(this.sizeBucket(params.name)),
                 }).end();
             }
         });
     }
 
-    async edit({ headers, body, params }, res) {
+    async edit({ headers, body, params, winston }, res) {
         try {
             const verifyUser = await this.user.count({ where: { nick: body.user_nick } });
             if (verifyUser !== 0) {
@@ -67,7 +66,7 @@ class BucketController {
                         res.status(409).json({ Message: 'Bucket already exists' }).end();
                     } else {
                         await this.bucket.update(body, { where: { user_nick: body.user_nick } });
-                        this.logger.info({ data: body, message: 'Bucket edit' }, { agent: headers['user-agent'] });
+                        winston.info({ data: body, message: 'Bucket edit' }, { agent: headers['user-agent'] });
                         res.status(200).json({ urlBucket: `${process.env.HOST}/${body.name}` }).end();
                     }
                 });
@@ -75,12 +74,12 @@ class BucketController {
                 res.status(404).json({ Message: 'User not found' }).end();
             }
         } catch (error) {
-            this.logger.error({ error, message: 'Bucket edit' }, { agent: headers['user-agent'] });
+            winston.error({ error, message: 'Bucket edit' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async delete({ headers, params }, res) {
+    async delete({ headers, params, winston }, res) {
         fs.rmdir(`./data/${params.name}`, async (err) => {
             if (err) {
                 if (err.errno === -2) {
@@ -92,17 +91,17 @@ class BucketController {
             } else {
                 try {
                     await this.bucket.destroy({ where: { name: params.name } });
-                    this.logger.info({ bucket: params.name, message: 'Bucket removed' }, { agent: headers['user-agent'] });
+                    winston.info({ bucket: params.name, message: 'Bucket delete' }, { agent: headers['user-agent'] });
                     res.status(200).json({ Message: 'Bucket removed successful' }).end();
                 } catch (error) {
-                    this.logger.error({ error, message: 'Bucket delete' }, { agent: headers['user-agent'] });
+                    winston.error({ error, message: 'Bucket delete' }, { agent: headers['user-agent'] });
                     res.status(500).json({ Message: 'Server Error' }).end();
                 }
             }
         });
     }
 
-    async sizeBucket(name) {
+    sizeBucket(name) {
         const data = fs.readdirSync(`./data/${name}`);
         let size = 0;
         for (let i = 0; i < data.length; i += 1) {
@@ -125,4 +124,4 @@ class BucketController {
     }
 }
 
-module.exports = app => new BucketController(app);
+module.exports = new BucketController();

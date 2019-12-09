@@ -11,12 +11,12 @@ const database = require('../config/database');
 
 module.exports = async (app) => {
     await database.sync();
-    app.use(`${app.get('version')}/buckets`, bucket(app));
-    app.use(`${app.get('version')}/folders`, folder(app));
-    app.use(`${app.get('version')}/logs`, logger(app));
-    app.use(`${app.get('version')}/login`, login(app));
-    app.use(`${app.get('version')}/managers`, manager(app));
-    app.use(`${app.get('version')}/objects`, object(app));
-    app.use(`${app.get('version')}/users`, user(app));
-    app.use('', root(app));
+    app.use(`${app.get('version')}/buckets`, bucket);
+    app.use(`${app.get('version')}/folders`, folder);
+    app.use(`${app.get('version')}/logs`, logger);
+    app.use(`${app.get('version')}/login`, login);
+    app.use(`${app.get('version')}/managers`, manager);
+    app.use(`${app.get('version')}/objects`, object);
+    app.use(`${app.get('version')}/users`, user);
+    app.use('', root);
 };

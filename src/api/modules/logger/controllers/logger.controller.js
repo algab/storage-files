@@ -1,17 +1,14 @@
 class LoggerController {
-    constructor(app) {
-        this.logger = app.get('logger');
+    constructor() {
         this.list = this.list.bind(this);
     }
 
-    async list({ headers, query }, res) {
+    async list({ query, winston }, res) {
         try {
-            this.logger.query({ level: query.level }, (err, data) => {
+            winston.query({ level: query.level }, (err, data) => {
                 if (err) {
-                    this.logger.error({ error: err, message: 'Logger list' }, { agent: headers['user-agent'] });
                     res.status(500).json({ Message: 'Server Error' }).end();
                 } else if (!err) {
-                    this.logger.info({ message: 'Logger list' }, { agent: headers['user-agent'] });
                     if (query.message) {
                         const logs = data.file.filter((log) => {
                             if (log.message.message === query.message) {
@@ -26,10 +23,9 @@ class LoggerController {
                 }
             });
         } catch (error) {
-            this.logger.error({ error, message: 'Logger list' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 }
 
-module.exports = app => new LoggerController(app);
+module.exports = new LoggerController();

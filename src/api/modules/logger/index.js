@@ -1,11 +1,7 @@
 const router = require('express').Router();
 const auth = require('../../middlewares/auth.middleware');
-const controller = require('./controllers/logger.controller');
+const logger = require('./controllers/logger.controller');
 
-module.exports = (app) => {
-    const logger = controller(app);
+router.get('/', auth.manager, logger.list);
 
-    router.get('/', auth.manager, logger.list);
-
-    return router;
-};
+module.exports = router;
