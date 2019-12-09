@@ -121,22 +121,22 @@ class Auth {
         }
     }
 
-    async object({ headers, query }, res, next) {
+    async object(req, res, next) {
         try {
-            const token = headers.authorization.slice(7);
+            const token = req.headers.authorization.slice(7);
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (query.bucket && decoded.permission === 'User') {
-                const result = await this.bucket.findOne({ where: { name: query.bucket } });
-                if (result.name === query.bucket) {
-                    res.locals.nick = decoded.nick;
+            if (req.query.bucket && decoded.permission === 'User') {
+                const result = await this.bucket.findOne({ where: { name: req.query.bucket } });
+                if (result.name === req.query.bucket) {
+                    req.nick = decoded.nick;
                     next();
                 } else {
                     res.status(401).send('Unauthorized').end();
                 }
-            } else if (query.bucket && decoded.permission === 'App') {
-                const result = await this.bucket.findOne({ where: { name: query.bucket } });
-                if (result.name === query.bucket) {
-                    res.locals.nick = decoded.nick;
+            } else if (req.query.bucket && decoded.permission === 'App') {
+                const result = await this.bucket.findOne({ where: { name: req.query.bucket } });
+                if (result.name === req.query.bucket) {
+                    req.nick = decoded.nick;
                     next();
                 } else {
                     res.status(401).send('Unauthorized').end();
