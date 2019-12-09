@@ -54,8 +54,8 @@ class RootController {
         }
     }
 
-    async folder({ headers, params, winston }, res) {
-        if (res.locals.folder) {
+    async folder({ headers, params, folder, winston }, res) {
+        if (folder) {
             fs.readdir(`./data/${params.bucket}/${params.param}`, (err, data) => {
                 if (err) {
                     winston.info({ bucket: params.bucket, folder: params.param, message: 'Bucket not found (folder list)' }, { agent: headers['user-agent'] });
@@ -73,9 +73,7 @@ class RootController {
         } else {
             winston.info({ bucket: params.bucket, object: params.param, message: 'Object' }, { agent: headers['user-agent'] });
             const object = fs.createReadStream(`./data/${params.bucket}/${params.param}`);
-            object.on('error', () => {
-                res.status(404).json({ Message: 'Object not found' }).end();
-            });
+            object.on('error', () => res.status(404).json({ Message: 'Object not found' }).end());
             object.pipe(res);
         }
     }
@@ -88,9 +86,7 @@ class RootController {
             message: 'Object',
         }, { agent: headers['user-agent'] });
         const object = fs.createReadStream(`./data/${params.bucket}/${params.folder}/${params.object}`);
-        object.on('error', () => {
-            res.status(404).json({ Message: 'Object not found' }).end();
-        });
+        object.on('error', () => res.status(404).json({ Message: 'Object not found' }).end());
         object.pipe(res);
     }
 }

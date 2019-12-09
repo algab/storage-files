@@ -16,10 +16,10 @@ class ObjectController {
             const nameFolder = req.query.folder;
             if (nameFolder) {
                 if (fs.existsSync(`./data/${nameBucket}/${nameFolder}`)) {
-                    this.uploadObject(req, res, `./data/${nameBucket}/${nameFolder}`)
+                    this.uploadObject(req, `./data/${nameBucket}/${nameFolder}`)
                         .then((result) => {
                             req.winston.info({
-                                nick: res.locals.nick,
+                                nick: req.nick,
                                 object: result.nameObject,
                                 message: 'Object saved successful',
                             }, { agent: req.headers['user-agent'] });
@@ -36,10 +36,10 @@ class ObjectController {
                     res.status(404).json({ Message: 'Folder not found' }).end();
                 }
             } else {
-                this.uploadObject(req, res, `./data/${nameBucket}`)
+                this.uploadObject(req, `./data/${nameBucket}`)
                     .then((result) => {
                         req.winston.info({
-                            nick: res.locals.nick,
+                            nick: req.nick,
                             object: result.nameObject,
                             message: 'Object saved successful',
                         }, { agent: req.headers['user-agent'] });
@@ -70,7 +70,7 @@ class ObjectController {
                             res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                         } else {
                             req.winston.info({
-                                nick: res.locals.nick,
+                                nick: req.nick,
                                 bucket: nameBucket,
                                 folder: nameFolder,
                                 object: nameObject,
@@ -92,7 +92,7 @@ class ObjectController {
                         res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
                     } else {
                         req.winston.info({
-                            nick: res.locals.nick,
+                            nick: req.nick,
                             bucket: nameBucket,
                             object: nameObject,
                             message: 'Object stats',
@@ -122,7 +122,7 @@ class ObjectController {
                             res.status(404).json({ Message: 'Make sure the bucket, folder and object is correct and try again' }).end();
                         } else {
                             req.winston.info({
-                                nick: res.locals.nick,
+                                nick: req.nick,
                                 bucket: nameBucket,
                                 folder: nameFolder,
                                 object: nameObject,
@@ -140,7 +140,7 @@ class ObjectController {
                         res.status(404).json({ Message: 'Make sure the bucket and object is correct and try again' }).end();
                     } else {
                         req.winston.info({
-                            nick: res.locals.nick,
+                            nick: req.nick,
                             bucket: nameBucket,
                             object: nameObject,
                             message: 'Object delete',
@@ -192,13 +192,13 @@ class ObjectController {
         return `${split[0]}-${total + 1}.${split[1]}`;
     }
 
-    uploadObject(req, res, path) {
+    uploadObject(req, path) {
         return new Promise((resolve, reject) => {
             const form = new formidable.IncomingForm();
             form.parse(req, () => { });
             form.on('progress', (rec, exp) => {
                 const percent = (rec / exp) * 100;
-                req.socket.emit(res.locals.nick, { percent: parseInt(percent, 10) });
+                req.socket.emit(req.nick, { percent: parseInt(percent, 10) });
             });
             form.on('file', async (_, file) => {
                 let nameObject = this.prepareName(file.name);
@@ -211,7 +211,7 @@ class ObjectController {
                     if (err) {
                         if (err.errno === -17) {
                             req.winston.error({
-                                nick: res.locals.nick,
+                                nick: req.nick,
                                 object: nameObject,
                                 message: 'Object already exists',
                             }, { agent: req.headers['user-agent'] });
@@ -221,7 +221,7 @@ class ObjectController {
                             })));
                         }
                         req.winston.error({
-                            nick: res.locals.nick,
+                            nick: req.nick,
                             object: nameObject,
                             message: 'Make sure the bucket and folder name is correct and try again',
                         }, { agent: req.headers['user-agent'] });
