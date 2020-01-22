@@ -15,11 +15,11 @@ app.use(require('cors')());
 app.use(require('helmet')({ noSniff: false }));
 
 app.use((req, res, next) => {
-    req.socket = socket;
+    app.locals.socket = socket;
     next();
 });
 app.use((req, res, next) => {
-    req.winston = winston;
+    app.locals.winston = winston;
     next();
 });
 

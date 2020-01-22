@@ -14,7 +14,7 @@ class BucketController {
         this.delete = this.delete.bind(this);
     }
 
-    async save({ headers, body, winston }, res) {
+    async save({ app, headers, body }, res) {
         try {
             const verifyUser = await this.user.count({ where: { nick: body.user_nick } });
             if (verifyUser !== 0) {
@@ -25,7 +25,7 @@ class BucketController {
                             res.status(409).json({ Message: 'Bucket already exists' }).end();
                         } else {
                             await this.bucket.create(body);
-                            winston.info({ data: body, message: 'Bucket save' }, { agent: headers['user-agent'] });
+                            app.locals.winston.info({ data: body, message: 'Bucket save' }, { agent: headers['user-agent'] });
                             res.status(201).json({ urlBucket: `${process.env.HOST}/${body.name}` }).end();
                         }
                     });
@@ -36,7 +36,7 @@ class BucketController {
                 res.status(404).json({ Message: 'User not found' }).end();
             }
         } catch (error) {
-            winston.error({ error, message: 'Bucket save' }, { agent: headers['user-agent'] });
+            app.locals.winston.error({ error, message: 'Bucket save' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
@@ -57,7 +57,7 @@ class BucketController {
         });
     }
 
-    async edit({ headers, body, params, winston }, res) {
+    async edit({ app, headers, body, params }, res) {
         try {
             const verifyUser = await this.user.count({ where: { nick: body.user_nick } });
             if (verifyUser !== 0) {
@@ -66,7 +66,7 @@ class BucketController {
                         res.status(409).json({ Message: 'Bucket already exists' }).end();
                     } else {
                         await this.bucket.update(body, { where: { user_nick: body.user_nick } });
-                        winston.info({ data: body, message: 'Bucket edit' }, { agent: headers['user-agent'] });
+                        app.locals.winston.info({ data: body, message: 'Bucket edit' }, { agent: headers['user-agent'] });
                         res.status(200).json({ urlBucket: `${process.env.HOST}/${body.name}` }).end();
                     }
                 });
@@ -74,12 +74,12 @@ class BucketController {
                 res.status(404).json({ Message: 'User not found' }).end();
             }
         } catch (error) {
-            winston.error({ error, message: 'Bucket edit' }, { agent: headers['user-agent'] });
+            app.locals.winston.error({ error, message: 'Bucket edit' }, { agent: headers['user-agent'] });
             res.status(500).json({ Message: 'Server Error' }).end();
         }
     }
 
-    async delete({ headers, params, winston }, res) {
+    async delete({ app, headers, params }, res) {
         fs.rmdir(`./data/${params.name}`, async (err) => {
             if (err) {
                 if (err.errno === -2) {
@@ -91,10 +91,10 @@ class BucketController {
             } else {
                 try {
                     await this.bucket.destroy({ where: { name: params.name } });
-                    winston.info({ bucket: params.name, message: 'Bucket delete' }, { agent: headers['user-agent'] });
+                    app.locals.winston.info({ bucket: params.name, message: 'Bucket delete' }, { agent: headers['user-agent'] });
                     res.status(200).json({ Message: 'Bucket removed successful' }).end();
                 } catch (error) {
-                    winston.error({ error, message: 'Bucket delete' }, { agent: headers['user-agent'] });
+                    app.locals.winston.error({ error, message: 'Bucket delete' }, { agent: headers['user-agent'] });
                     res.status(500).json({ Message: 'Server Error' }).end();
                 }
             }

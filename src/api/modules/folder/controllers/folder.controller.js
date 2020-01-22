@@ -19,7 +19,8 @@ class FolderController {
                     res.status(404).json({ Message: 'Bucket not found' }).end();
                 }
             } else {
-                req.winston.info({ data: req.body, message: 'Folder save' }, { agent: req.headers['user-agent'] });
+                const { app } = req;
+                app.locals.winston.info({ data: req.body, message: 'Folder save' }, { agent: req.headers['user-agent'] });
                 res.status(201).json({ urlFolder: `${process.env.HOST}/${req.body.bucket}/${req.body.folder}` }).end();
             }
         });
@@ -40,7 +41,7 @@ class FolderController {
         });
     }
 
-    async edit({ headers, body, params, winston }, res) {
+    async edit({ app, headers, body, params }, res) {
         fs.rename(`./data/${body.bucket}/${params.name}`, `./data/${body.bucket}/${body.folder}`, (err) => {
             if (err) {
                 if (err.errno === -17) {
@@ -53,13 +54,13 @@ class FolderController {
                     res.status(404).json({ Message: 'Bucket not found' }).end();
                 }
             } else {
-                winston.info({ bucket: body.bucket, folder: body.folder, message: 'Folder edit' }, { agent: headers['user-agent'] });
+                app.locals.winston.info({ bucket: body.bucket, folder: body.folder, message: 'Folder edit' }, { agent: headers['user-agent'] });
                 res.status(200).json({ urlFolder: `${process.env.HOST}/${body.bucket}/${body.folder}` }).end();
             }
         });
     }
 
-    async delete({ headers, params, query, winston }, res) {
+    async delete({ app, headers, params, query }, res) {
         fs.rmdir(`./data/${query.bucket}/${params.name}`, (err) => {
             if (err) {
                 if (err.errno === -17 || err.errno === -39) {
@@ -69,7 +70,7 @@ class FolderController {
                     res.status(404).json({ Message: 'Bucket not found' });
                 }
             } else {
-                winston.info({ bucket: query.bucket, folder: params.name, message: 'Folder delete' }, { agent: headers['user-agent'] });
+                app.locals.winston.info({ bucket: query.bucket, folder: params.name, message: 'Folder delete' }, { agent: headers['user-agent'] });
                 res.status(200).json({ Message: 'Folder removed successful' }).end();
             }
         });
