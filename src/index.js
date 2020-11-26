@@ -1,6 +1,8 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -15,17 +17,20 @@ app.use(require('cors')());
 app.use(require('helmet')({ noSniff: false }));
 
 app.use((req, res, next) => {
-    app.locals.socket = socket;
-    next();
+  app.locals.socket = socket;
+  next();
 });
 app.use((req, res, next) => {
-    app.locals.winston = winston;
-    next();
+  app.locals.winston = winston;
+  next();
 });
 
 require('./api')(app);
 
 (async () => {
-    await server.listen(process.env.PORT);
-    console.log(`API Running on Port ${process.env.PORT}`);
+  if (!fs.existsSync(path.join(__dirname, '../data'))) {
+    fs.mkdirSync(path.join(__dirname, '../data'));
+  }
+  await server.listen(process.env.PORT);
+  console.log(`API Running on Port ${process.env.PORT}`);
 })();

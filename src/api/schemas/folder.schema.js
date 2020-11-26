@@ -1,17 +1,14 @@
 const joi = require('joi');
 
-const bucket = joi.object({
-  name: joi
+const folder = joi.object({
+  bucket: joi
     .string()
     .regex(/^[a-z,0-9]+$/)
-    .min(4)
     .required(),
-  user_nick: joi
+  folder: joi
     .string()
     .regex(/^[a-z,0-9]+$/)
-    .min(4)
     .required(),
-  private: joi.boolean().required(),
 });
 
-module.exports = bucket;
+module.exports = folder;

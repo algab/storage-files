@@ -1,23 +1,14 @@
-const { Model, DataTypes } = require('sequelize');
+const joi = require('joi');
 
-class User extends Model {
-    static init(sequelize) {
-        super.init({
-            nick: { type: DataTypes.STRING, primaryKey: true },
-            name: { type: DataTypes.STRING, allowNull: false },
-            email: { type: DataTypes.STRING, allowNull: false },
-            password: { type: DataTypes.STRING, allowNull: true },
-        }, { sequelize, tableName: 'users' });
-    }
+const user = joi.object({
+  nick: joi
+    .string()
+    .regex(/^[a-z,0-9]+$/)
+    .min(4)
+    .required(),
+  name: joi.string().required(),
+  email: joi.string().email().required(),
+  password: joi.string().min(6).max(20),
+});
 
-    static associate(models) {
-        this.hasOne(models.Bucket, {
-            foreignKey: 'user_nick',
-            as: 'bucket',
-            onUpdate: 'cascade',
-            onDelete: 'cascade',
-        });
-    }
-}
-
-module.exports = User;
+module.exports = user;

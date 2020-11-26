@@ -1,12 +1,10 @@
-const joi = require('joi');
-
-const validate = model => (req, res, next) => {
-    const result = joi.validate(req.body, model);
-    if (result.error) {
-        res.status(400).json(result.error.details).end();
-    } else {
-        next();
-    }
+const validate = (schema) => ({ body }, res, next) => {
+  const result = schema.validate(body);
+  if (result.error) {
+    res.status(400).json(result.error.details).end();
+  } else {
+    next();
+  }
 };
 
 module.exports = validate;

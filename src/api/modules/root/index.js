@@ -1,6 +1,8 @@
 const router = require('express').Router();
+
 const auth = require('../../middlewares/auth.middleware');
 const verify = require('../../middlewares/verify.middleware');
+
 const root = require('./controllers/root.controller');
 
 router.get('/:bucket', auth.verifyBucket, root.bucket);
