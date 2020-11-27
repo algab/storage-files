@@ -1,4 +1,4 @@
-FROM ubuntu:18.10
+FROM ubuntu:20.10
 
 WORKDIR /home/node/app
 
@@ -19,12 +19,14 @@ RUN apt-get -y update && apt-get -y install nodejs && apt-get -y install npm
 
 RUN apt-get -y install sqlite3 && apt-get -y upgrade
 
-RUN npm install --production
+RUN npm install
 
 COPY . .
 
-EXPOSE 8080
+RUN npm run migrate:run
 
 CMD ["npm","start"]
+
+EXPOSE 8080
 
 VOLUME /home/node/app/data
