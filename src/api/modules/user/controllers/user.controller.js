@@ -4,6 +4,16 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../../../../database/models');
 
 class UserController {
+  constructor() {
+    this.save = this.save.bind(this);
+    this.list = this.list.bind(this);
+    this.search = this.search.bind(this);
+    this.edit = this.edit.bind(this);
+    this.password = this.password.bind(this);
+    this.token = this.token.bind(this);
+    this.delete = this.delete.bind(this);
+  }
+
   async save({ app, headers, body }, res) {
     try {
       const data = body;

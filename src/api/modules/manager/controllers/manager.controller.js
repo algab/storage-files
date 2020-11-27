@@ -3,6 +3,15 @@ const hasha = require('hasha');
 const { Manager } = require('../../../../database/models');
 
 class ManagerController {
+  constructor() {
+    this.save = this.save.bind(this);
+    this.list = this.list.bind(this);
+    this.search = this.search.bind(this);
+    this.edit = this.edit.bind(this);
+    this.password = this.password.bind(this);
+    this.delete = this.delete.bind(this);
+  }
+
   async save(req, res) {
     try {
       const data = req.body;

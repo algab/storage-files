@@ -4,6 +4,12 @@ const fsExtra = require('fs-extra');
 const fs = require('fs');
 
 class ObjectController {
+  constructor() {
+    this.upload = this.upload.bind(this);
+    this.stats = this.stats.bind(this);
+    this.delete = this.delete.bind(this);
+  }
+
   async upload(req, res) {
     const nameBucket = req.query.bucket;
     if (fs.existsSync(`./data/${nameBucket}`)) {

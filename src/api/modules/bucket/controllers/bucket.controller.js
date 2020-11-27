@@ -4,6 +4,13 @@ const fs = require('fs');
 const { Bucket, User } = require('../../../../database/models');
 
 class BucketController {
+  constructor() {
+    this.save = this.save.bind(this);
+    this.stats = this.stats.bind(this);
+    this.edit = this.edit.bind(this);
+    this.delete = this.delete.bind(this);
+  }
+
   async save({ app, headers, body }, res) {
     try {
       const verifyUser = await User.count({ where: { nick: body.user_nick } });

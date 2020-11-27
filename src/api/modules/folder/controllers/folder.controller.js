@@ -2,6 +2,13 @@ const pretty = require('prettysize');
 const fs = require('fs');
 
 class FolderController {
+  constructor() {
+    this.save = this.save.bind(this);
+    this.stats = this.stats.bind(this);
+    this.edit = this.edit.bind(this);
+    this.delete = this.delete.bind(this);
+  }
+
   async save(req, res) {
     fs.mkdir(`./data/${req.body.bucket}/${req.body.folder}`, (err) => {
       if (err) {

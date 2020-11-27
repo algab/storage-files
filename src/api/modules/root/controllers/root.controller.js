@@ -1,6 +1,12 @@
 const fs = require('fs');
 
 class RootController {
+  constructor() {
+    this.bucket = this.bucket.bind(this);
+    this.folder = this.folder.bind(this);
+    this.object = this.object.bind(this);
+  }
+
   async bucket({ app, headers, params, query }, res) {
     try {
       let data = await fs.readdirSync(`./data/${params.bucket}`);
