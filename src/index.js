@@ -12,6 +12,7 @@ const winston = require('./config/winston');
 
 app.set('version', '/v1');
 
+app.use(express.urlencoded({ limit: '50mb', extended: false }));
 app.use(express.json());
 app.use(require('cors')());
 app.use(require('helmet')({ noSniff: false }));
